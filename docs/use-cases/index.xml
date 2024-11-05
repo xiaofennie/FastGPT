@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>使用案例 on FastGPT</title><link>https://doc.tryfastgpt.ai/docs/use-cases/</link><description>Recent content in 使用案例 on FastGPT</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><atom:link href="https://doc.tryfastgpt.ai/docs/use-cases/index.xml" rel="self" type="application/rss+xml"/><item><title>使用 Gapier 快速导入Agent工具</title><link>https://doc.tryfastgpt.ai/docs/use-cases/gapier/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://doc.tryfastgpt.ai/docs/use-cases/gapier/</guid><description>FastGPT V4.7版本加入了工具调用，可以兼容 GPTs 的 Actions。这意味着，你可以直接导入兼容 GPTs 的 Agent 工具。
+Gapier 是一个在线 GPTs Actions工具，提供了50多种现成工具，并且每天有免费额度进行测试，方便用户试用，官方地址为：https://gapier.com/。
+现在，我们开始把 Gapier 的工具导入到 FastGPT 中。
+1. 创建插件 link Step1 Step2 Step3 登录Gapier 复制相关参数 Step4 Step5 Step6 自定义请求头: Authorization
+请求值: Bearer 复制的key 创建完后，如果需要变更，无需重新创建，只需要修改对应参数即可，会自动做差值比较更新。
+2. 应用绑定工具 link简易模式 link Step1 Step2 Step3 Step4 高级编排 link Step1 Step2 Step3 Step4 3. 工具调用说明 link不同模型的区别 link不同模型调用工具采用不同的方法，有些模型支持 toolChoice 和 functionCall 效果会更好。不支持这两种方式的模型通过提示词调用，但是效果不是很好，并且为了保证顺利调用，FastGPT内置的提示词，仅支持每次调用一个工具。
+具体哪些模型支持 functionCall 可以官网查看（当然，也需要OneAPI支持），同时需要调整模型配置文件中的对应字段（详细看配置字段说明）。
+线上版用户，可以在模型选择时，看到是否支持函数调用的标识。</description></item><item><title>对接 chatgpt-on-wechat</title><link>https://doc.tryfastgpt.ai/docs/use-cases/onwechat/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://doc.tryfastgpt.ai/docs/use-cases/onwechat/</guid><description>1 分钟对接 chatgpt-on-wechat linkchatgpt-on-wechat GitHub 地址
+由于 FastGPT 的 API 接口和 OpenAI 的规范一致，可以无需变更原来的应用即可使用 FastGPT 上编排好的应用。API 使用可参考 这篇文章。编排示例，可参考 高级编排介绍
+1. 获取 OpenAPI 密钥 link依次选择应用 -&amp;gt; 「API访问」，然后点击「API 密钥」来创建密钥。
+warning 密钥需要自己保管好，一旦关闭就无法再复制密钥，只能创建新密钥再复制。
+3. 创建 docker-compose.yml 文件 link只需要修改 OPEN_AI_API_KEY 和 OPEN_AI_API_BASE 两个环境变量即可。其中 OPEN_AI_API_KEY 为第一步获取的密钥，OPEN_AI_API_BASE 为 FastGPT 的 OpenAPI 地址，例如：https://api.fastgpt.in/api/v1。
+随便找一个目录，创建一个 docker-compose.yml 文件，将下面的代码复制进去。
+version: &amp;#39;2.0&amp;#39; services: chatgpt-on-wechat: image: zhayujie/chatgpt-on-wechat container_name: chatgpt-on-wechat security_opt: - seccomp:unconfined environment: OPEN_AI_API_KEY: &amp;#39;fastgpt-z51pkjqm9nrk03a1rx2funoy&amp;#39; OPEN_AI_API_BASE: &amp;#39;https://api.fastgpt.in/api/v1&amp;#39; MODEL: &amp;#39;gpt-3.5-turbo&amp;#39; CHANNEL_TYPE: &amp;#39;wx&amp;#39; PROXY: &amp;#39;&amp;#39; HOT_RELOAD: &amp;#39;False&amp;#39; SINGLE_CHAT_PREFIX: &amp;#39;[&amp;#34;bot&amp;#34;, &amp;#34;@bot&amp;#34;]&amp;#39; SINGLE_CHAT_REPLY_PREFIX: &amp;#39;&amp;#34;[bot] &amp;#34;&amp;#39; GROUP_CHAT_PREFIX: &amp;#39;[&amp;#34;@bot&amp;#34;]&amp;#39; GROUP_NAME_WHITE_LIST: &amp;#39;[&amp;#34;ChatGPT测试群&amp;#34;, &amp;#34;ChatGPT测试群2&amp;#34;]&amp;#39; IMAGE_CREATE_PREFIX: &amp;#39;[&amp;#34;画&amp;#34;, &amp;#34;看&amp;#34;, &amp;#34;找&amp;#34;]&amp;#39; CONVERSATION_MAX_TOKENS: 1000 SPEECH_RECOGNITION: &amp;#39;False&amp;#39; CHARACTER_DESC: &amp;#39;你是ChatGPT, 一个由OpenAI训练的大型语言模型, 你旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流。&amp;#39; SUBSCRIBE_MSG: &amp;#39;感谢您的关注！\n这里是ChatGPT，可以自由对话。\n支持语音对话。\n支持图片输入。\n支持图片输出，画字开头的消息将按要求创作图片。\n支持tool、角色扮演和文字冒险等丰富的插件。\n输入{trigger_prefix}#help 查看详细指令。&amp;#39; EXPIRES_IN_SECONDS: 3600 USE_GLOBAL_PLUGIN_CONFIG: &amp;#39;True&amp;#39; USE_LINKAI: &amp;#39;False&amp;#39; LINKAI_API_KEY: &amp;#39;&amp;#39; LINKAI_APP_CODE: &amp;#39;&amp;#39; 4.</description></item><item><title>接入微信和企业微信</title><link>https://doc.tryfastgpt.ai/docs/use-cases/wechat/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://doc.tryfastgpt.ai/docs/use-cases/wechat/</guid><description>FastGPT 三分钟接入微信/企业微信 link私人微信和企业微信接入的方式基本一样，不同的地方会刻意指出。
+查看视频教程
+创建APIKey link首先找到我们需要接入的应用，然后点击「外部使用」-&amp;gt;「API访问」创建一个APIKey并保存。
+配置微秘书 link打开微秘书 注册登录后找到菜单栏「基础配置」-&amp;gt;「智能配置」，按照下图配置。
+继续往下看到 apikey 和服务器根地址，这里apikey填写我们在 FastGPT 应用外部访问中创建的 APIkey，服务器根地址填写官方地址或者私有化部署的地址，这里用官方地址示例，注意要添加/v1后缀,填写完毕后保存。
+sealos部署服务 link访问sealos 登录进来之后打开「应用管理」-&amp;gt; 「新建应用」。
+应用名：称随便填写 镜像名：私人微信填写 aibotk/wechat-assistant 企业微信填写 aibotk/worker-assistant cpu和内存建议 1c1g 往下翻页找到「高级配置」-&amp;gt; 「编辑环境变量」
+这里需要填写三个环境变量：
+AIBOTK_KEY=微秘书 APIKEY AIBOTK_SECRET=微秘书 APISECRET WORK_PRO_TOKEN=你申请的企微 token （企业微信需要填写，私人微信不需要） 这里最后的企业微信 Token 在微秘书的-&amp;gt;会员开通栏目中自行购买。
+这里环境变量我们介绍下如何填写：
+AIBOTK_KEY 和 AIBOTK_SECRET 我们需要回到微秘书找到「个人中心」,这里的 APIKEY 对应 AIBOTK_KEY ，APISECRET 对应 AIBOTK_SECRET。
+WORK_PRO_TOKEN 微秘书的会员中心中自行购买即可。
+填写完毕后点右上角「部署」，等待应用状态变为运行中。
+返回微秘书 找到「首页」，扫码登录需要接入的微信号。
+测试 link只需要发送信息，或者拉入群聊@登录的微信就会回复信息啦。</description></item></channel></rss>
