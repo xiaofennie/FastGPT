@@ -36,10 +36,10 @@ async function handler(req: NextApiRequest): CreateCollectionResponse {
   });
 
   // 1. check dataset limit
-  await checkDatasetLimit({
-    teamId,
-    insertLen: predictDataLimitLength(trainingType, new Array(10))
-  });
+  // await checkDatasetLimit({
+  //   teamId,
+  //   insertLen: predictDataLimitLength(trainingType, new Array(10))
+  // });
 
   return mongoSessionRun(async (session) => {
     // 2. create collection

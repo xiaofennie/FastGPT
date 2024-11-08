@@ -96,10 +96,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>): CreateCo
     });
 
     // 5. check dataset limit
-    await checkDatasetLimit({
-      teamId,
-      insertLen: predictDataLimitLength(trainingType, chunks)
-    });
+    // await checkDatasetLimit({
+    //   teamId,
+    //   insertLen: predictDataLimitLength(trainingType, chunks)
+    // });
 
     // 6. create collection and training bill
     const { collectionId, insertResults } = await mongoSessionRun(async (session) => {
