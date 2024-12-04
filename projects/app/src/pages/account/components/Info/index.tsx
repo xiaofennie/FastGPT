@@ -45,6 +45,7 @@ import StandardPlanContentList from '@/components/support/wallet/StandardPlanCon
 import { TeamMemberRoleEnum } from '@fastgpt/global/support/user/team/constant';
 import QuestionTip from '@fastgpt/web/components/common/MyTooltip/QuestionTip';
 import { useSystem } from '@fastgpt/web/hooks/useSystem';
+import TeamSelector from '@/components/Select/TeamSelector';
 
 const StandDetailModal = dynamic(() => import('./standardDetailModal'));
 const TeamMenu = dynamic(() => import('@/components/support/user/team/TeamMenu'));
@@ -295,7 +296,8 @@ const MyInfo = ({ onOpenContact }: { onOpenContact: () => void }) => {
         <Flex mt={6} alignItems={'center'}>
           <Box {...labelStyles}>{t('common:user.Team')}:&nbsp;</Box>
           <Box flex={1}>
-            <TeamMenu />
+            {/* <TeamMenu /> */}
+            <TeamSelector />
           </Box>
         </Flex>
         {feConfigs?.isPlus && (userInfo?.team?.balance ?? 0) > 0 && (
