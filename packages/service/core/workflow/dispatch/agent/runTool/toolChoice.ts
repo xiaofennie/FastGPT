@@ -356,9 +356,14 @@ export const runToolWithToolChoice = async (
             }
           })();
 
-          initToolNodes(runtimeNodes, [toolNode.nodeId], startParams);
+          const newRuntimeNodes = initToolNodes(
+            [...workflowProps.runtimeNodes],
+            [toolNode.nodeId],
+            startParams
+          );
           const toolRunResponse = await dispatchWorkFlow({
             ...workflowProps,
+            runtimeNodes: newRuntimeNodes, // 使用新的节点数组
             isToolCall: true
           });
 
