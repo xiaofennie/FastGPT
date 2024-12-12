@@ -12,7 +12,8 @@
     "mysql2": "^3.11.3",
     "json5": "^2.2.3",
     "pg": "^8.10.0",
-    "wikijs": "^6.4.1"
+    "wikijs": "^6.4.1",
+    "doris2": "^1.0.7"
   },
   "devDependencies": {
     "@fastgpt/global": "workspace:*",
