@@ -13,7 +13,9 @@
     "json5": "^2.2.3",
     "pg": "^8.10.0",
     "wikijs": "^6.4.1",
-    "doris2": "^1.0.7"
+    "doris2": "^1.0.7",
+    "vega": "^5.25.0",
+    "vega-lite": "^5.16.0"
   },
   "devDependencies": {
     "@fastgpt/global": "workspace:*",

@@ -16,6 +16,7 @@ const packagePluginList = [
   'duckduckgo/searchVideo',
   'drawing',
   'drawing/baseChart',
+  'drawing/baseChart2',
   'wiki',
   'databaseConnection',
   'Doc2X',
