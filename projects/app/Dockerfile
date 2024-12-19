@@ -33,7 +33,16 @@ COPY --from=maindeps /app/projects/app/node_modules ./projects/app/node_modules
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 
-RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0
+RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
+
+
+# Add system dependencies for canvas
+RUN apk add --no-cache build-base cairo-dev pango-dev jpeg-dev giflib-dev pixman-dev pangomm-dev libjpeg-turbo-dev freetype-dev python3
+
+# Set environment variables for node-canvas
+ENV CXXFLAGS=-std=c++17
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
+ENV LD_LIBRARY_PATH=/usr/lib
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_PUBLIC_BASE_URL=$base_url

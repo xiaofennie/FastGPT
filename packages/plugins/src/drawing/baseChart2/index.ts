@@ -1,5 +1,6 @@
 import * as vega from 'vega';
 import * as vegaLite from 'vega-lite';
+import { TopLevelSpec, compile as vegaLiteCompile } from 'vega-lite';
 import { SystemPluginSpecialResponse } from '../../../type';
 
 // Types
@@ -169,10 +170,11 @@ const generateChart = async (
 ) => {
   try {
     console.log('Creating Vega spec...');
-    const vegaLiteSpec = generateVegaSpec(data, title, chartType);
+    const vegaLiteSpec = generateVegaSpec(data, title, chartType) as TopLevelSpec;
 
     console.log('Compiling Vega spec...');
-    const vegaSpec = vegaLite.compile(vegaLiteSpec).spec;
+    const compiledSpec = vegaLiteCompile(vegaLiteSpec);
+    const vegaSpec = compiledSpec.spec;
 
     console.log('Creating Vega view...');
     const view = new vega.View(vega.parse(vegaSpec), { renderer: 'none' });
