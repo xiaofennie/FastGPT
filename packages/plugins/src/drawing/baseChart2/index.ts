@@ -1,6 +1,5 @@
 import * as vega from 'vega';
-import * as vegaLite from 'vega-lite';
-import { TopLevelSpec, compile as vegaLiteCompile } from 'vega-lite';
+import { compile as vegaLiteCompile, TopLevelSpec } from 'vega-lite';
 import { SystemPluginSpecialResponse } from '../../../type';
 
 // Types
