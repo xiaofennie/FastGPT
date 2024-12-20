@@ -139,6 +139,7 @@ const generateVegaSpec = (
           color: {
             field: 'category',
             type: 'nominal',
+            sort: false,
             scale: {
               range: [
                 '#1890ff',
