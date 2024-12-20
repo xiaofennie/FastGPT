@@ -5,6 +5,7 @@
   "dependencies": {
     "@types/pg": "^8.6.6",
     "axios": "^1.5.1",
+    "canvas": "^2.11.2",
     "duck-duck-scrape": "^2.2.5",
     "echarts": "5.4.1",
     "expr-eval": "^2.0.2",

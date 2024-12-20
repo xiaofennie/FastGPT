@@ -5,7 +5,37 @@ WORKDIR /app
 ARG proxy
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
+
+# Add system dependencies for canvas
+RUN apk add --no-cache \
+    libc6-compat \
+    build-base \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    python3 \
+    g++ \
+    make \
+    cairo \
+    pango \
+    libjpeg-turbo \
+    giflib \
+    librsvg-dev \
+    pkgconfig \
+    pixman \
+    git
+
+# Set environment variables for node-canvas
+ENV CXXFLAGS=-std=c++17
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
+ENV LD_LIBRARY_PATH=/usr/lib
+
+RUN npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
 
 # copy packages and one project
 COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
@@ -37,7 +67,27 @@ RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0 --registry=http
 
 
 # Add system dependencies for canvas
-RUN apk add --no-cache build-base cairo-dev pango-dev jpeg-dev giflib-dev pixman-dev pangomm-dev libjpeg-turbo-dev freetype-dev python3
+RUN apk add --no-cache \
+    build-base \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    python3 \
+    g++ \
+    make \
+    cairo \
+    pango \
+    libjpeg-turbo \
+    giflib \
+    librsvg-dev \
+    pkgconfig \
+    pixman \
+    git
 
 # Set environment variables for node-canvas
 ENV CXXFLAGS=-std=c++17
