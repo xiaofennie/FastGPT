@@ -79,6 +79,7 @@ const generateVegaSpec = (
           x: {
             field: 'category',
             type: 'nominal',
+            sort: false,
             axis: {
               title: '',
               labelAngle: -45
@@ -106,6 +107,7 @@ const generateVegaSpec = (
           x: {
             field: 'category',
             type: 'nominal',
+            sort: false,
             axis: {
               title: '',
               labelAngle: -45
