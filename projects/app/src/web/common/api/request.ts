@@ -110,7 +110,11 @@ function responseError(err: any) {
   // 有报错响应
   if (err?.code in TOKEN_ERROR_CODE) {
     if (
-      !(window.location.pathname === '/chat/share' || window.location.pathname === '/chat/team')
+      !(
+        window.location.pathname === '/chat/share' ||
+        window.location.pathname === '/chat/team' ||
+        window.location.pathname === '/chat/analyse'
+      )
     ) {
       clearToken();
       window.location.replace(

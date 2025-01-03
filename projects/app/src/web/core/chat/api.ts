@@ -46,6 +46,9 @@ export const getTeamChatInfo = (data: InitTeamChatProps) =>
  */
 export const getChatHistories = (data: PaginationProps<GetHistoriesProps>) =>
   POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistories', data);
+
+export const getChatHistoriesV2 = (data: PaginationProps<GetHistoriesProps>) =>
+  POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistoriesV2', data);
 /**
  * get detail responseData by dataId appId chatId
  */
@@ -54,6 +57,9 @@ export const getChatResData = (data: getResDataQuery) =>
 
 export const getChatRecords = (data: getPaginationRecordsBody) =>
   POST<getPaginationRecordsResponse>('core/chat/getPaginationRecords', data);
+
+export const getChatRecordsV2 = (data: getPaginationRecordsBody) =>
+  POST<getPaginationRecordsResponse>('core/chat/getPaginationRecordsV2', data);
 
 /**
  * delete one history
