@@ -60,10 +60,10 @@ export const createCollectionAndInsertData = async ({
   });
 
   // 2. auth limit
-  await checkDatasetLimit({
-    teamId,
-    insertLen: predictDataLimitLength(trainingType, chunks)
-  });
+  // await checkDatasetLimit({
+  //   teamId,
+  //   insertLen: predictDataLimitLength(trainingType, chunks)
+  // });
 
   const fn = async (session: ClientSession) => {
     // 3. create collection
