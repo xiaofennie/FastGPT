@@ -4,8 +4,38 @@ WORKDIR /app
 
 ARG proxy
 
-RUN [ -z "$proxy" ] || sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+
+# Add system dependencies for canvas
+RUN apk add --no-cache \
+    libc6-compat \
+    build-base \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    python3 \
+    g++ \
+    make \
+    cairo \
+    pango \
+    libjpeg-turbo \
+    giflib \
+    librsvg-dev \
+    pkgconfig \
+    pixman \
+    git
+
+# Set environment variables for node-canvas
+ENV CXXFLAGS=-std=c++17
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
+ENV LD_LIBRARY_PATH=/usr/lib
+
+RUN npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
 
 # copy packages and one project
 COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
@@ -15,11 +45,7 @@ COPY ./projects/app/package.json ./projects/app/package.json
 RUN [ -f pnpm-lock.yaml ] || (echo "Lockfile not found." && exit 1)
 
 # if proxy exists, set proxy
-RUN if [ -z "$proxy" ]; then \
-        pnpm i; \
-    else \
-        pnpm i --registry=https://registry.npmmirror.com; \
-    fi
+RUN pnpm i --registry=https://registry.npmmirror.com
 
 # --------- builder -----------
 FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS builder
@@ -35,9 +61,38 @@ COPY --from=maindeps /app/packages ./packages
 COPY ./projects/app ./projects/app
 COPY --from=maindeps /app/projects/app/node_modules ./projects/app/node_modules
 
-RUN [ -z "$proxy" ] || sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 
-RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0
+RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
+
+
+# Add system dependencies for canvas
+RUN apk add --no-cache \
+    build-base \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    python3 \
+    g++ \
+    make \
+    cairo \
+    pango \
+    libjpeg-turbo \
+    giflib \
+    librsvg-dev \
+    pkgconfig \
+    pixman \
+    git
+
+# Set environment variables for node-canvas
+ENV CXXFLAGS=-std=c++17
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
+ENV LD_LIBRARY_PATH=/usr/lib
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_PUBLIC_BASE_URL=$base_url
@@ -54,7 +109,7 @@ ARG base_url
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-RUN [ -z "$proxy" ] || sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache curl ca-certificates \
   && update-ca-certificates
 
