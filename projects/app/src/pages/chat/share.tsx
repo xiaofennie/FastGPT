@@ -50,12 +50,13 @@ type Props = {
   customUid: string;
   showRawSource: boolean;
   showNodeStatus: boolean;
+  cassWebAuthToken: string;
 };
 
 const OutLink = (props: Props) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { showRawSource, showNodeStatus } = props;
+  const { showRawSource, showNodeStatus, cassWebAuthToken } = props;
   const {
     shareId = '',
     showHistory = '1',
@@ -158,7 +159,8 @@ const OutLink = (props: Props) => {
           messages: histories,
           variables: {
             ...variables,
-            ...customVariables
+            ...customVariables,
+            cassWebAuthToken
           },
           responseChatItemId,
           chatId: completionChatId,
@@ -203,7 +205,8 @@ const OutLink = (props: Props) => {
       onUpdateHistoryTitle,
       setChatBoxData,
       forbidLoadChat,
-      onChangeChatId
+      onChangeChatId,
+      cassWebAuthToken
     ]
   );
 
@@ -357,6 +360,7 @@ export async function getServerSideProps(context: any) {
   const shareId = context?.query?.shareId || '';
   const authToken = context?.query?.authToken || '';
   const customUid = context?.query?.customUid || '';
+  const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
 
   const app = await (async () => {
     try {
@@ -385,6 +389,7 @@ export async function getServerSideProps(context: any) {
       showNodeStatus: app?.showNodeStatus ?? false,
       shareId: shareId ?? '',
       authToken: authToken ?? '',
+      cassWebAuthToken: cassWebAuthToken ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }

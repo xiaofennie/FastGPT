@@ -2,7 +2,8 @@ function embedChatbot() {
   const chatBtnId = 'fastgpt-chatbot-button';
   const chatWindowId = 'fastgpt-chatbot-window';
   const script = document.getElementById('chatbot-iframe');
-  const botSrc = script?.getAttribute('data-bot-src');
+  const cassWebAuthToken = script?.getAttribute('cass-web-auth-token');
+  var botSrc = script?.getAttribute('data-bot-src');
   const defaultOpen = script?.getAttribute('data-default-open') === 'true';
   const canDrag = script?.getAttribute('data-drag') === 'true';
   const MessageIcon =
@@ -32,6 +33,10 @@ function embedChatbot() {
   ChatBtnDiv.setAttribute('height', '100%');
   ChatBtnDiv.draggable = false;
 
+  if (cassWebAuthToken) {
+    botSrc = botSrc + '&cassWebAuthToken=' + cassWebAuthToken;
+  }
+
   const iframe = document.createElement('iframe');
   iframe.allow = '*';
   iframe.referrerPolicy = 'no-referrer';
@@ -41,6 +46,8 @@ function embedChatbot() {
   iframe.style.cssText =
     'border: none; position: fixed; flex-direction: column; justify-content: space-between; box-shadow: rgba(150, 150, 150, 0.2) 0px 10px 30px 0px, rgba(150, 150, 150, 0.2) 0px 0px 0px 1px; bottom: 80px; right: 60px; width: 375px; height: 667px; max-width: 90vw; max-height: 85vh; border-radius: 0.75rem; display: flex; z-index: 2147483647; overflow: hidden; left: unset; background-color: #F3F4F6;';
   iframe.style.visibility = defaultOpen ? 'unset' : 'hidden';
+
+  console.log('botSrc', botSrc);
 
   document.body.appendChild(iframe);
 

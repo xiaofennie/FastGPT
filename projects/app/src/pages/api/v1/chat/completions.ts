@@ -61,6 +61,8 @@ import { WORKFLOW_MAX_RUN_TIMES } from '@fastgpt/service/core/workflow/constants
 import { getPluginInputsFromStoreNodes } from '@fastgpt/global/core/app/plugin/utils';
 import { ExternalProviderType } from '@fastgpt/global/core/workflow/runtime/type';
 
+import { verifyandParseJwt } from '@/service/common/system/index';
+
 type FastGptWebChatProps = {
   chatId?: string; // undefined: get histories from messages, '': new chat, 'xxxxx': get histories from db
   appId?: string;
@@ -120,6 +122,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     responseChatItemId = getNanoid(),
     metadata
   } = req.body as Props;
+
+  if (variables.cassWebAuthToken) {
+    const userInfo = verifyandParseJwt(variables.cassWebAuthToken);
+    variables.cassWebAuthToken = (userInfo?.sub as string) || '';
+  }
 
   const originIp = requestIp.getClientIp(req);
 

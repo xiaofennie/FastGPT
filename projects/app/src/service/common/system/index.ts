@@ -12,6 +12,7 @@ import { SystemPluginTemplateItemType } from '@fastgpt/global/core/workflow/type
 import { defaultGroup, defaultTemplateTypes } from '@fastgpt/web/core/workflow/constants';
 import { MongoPluginGroups } from '@fastgpt/service/core/app/plugin/pluginGroupSchema';
 import { MongoTemplateTypes } from '@fastgpt/service/core/app/templates/templateTypeSchema';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export const readConfigData = (name: string) => {
   const splitName = name.split('.');
@@ -204,5 +205,28 @@ export async function initAppTemplateTypes() {
     );
   } catch (error) {
     console.error('Error initializing system templates:', error);
+  }
+}
+
+export function verifyandParseJwt(token: string): JwtPayload | string | null {
+  try {
+    const publicKey = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, '\n');
+    if (!publicKey) {
+      return null;
+    }
+    // 验证签名
+    const verifyJwt = jwt.verify(token, publicKey!, {
+      algorithms: ['RS256'],
+      ignoreExpiration: true
+    }) as JwtPayload;
+    if (verifyJwt) {
+      const decoded = jwt.decode(token);
+      return decoded;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('JWT verification failed:', error);
+    return null;
   }
 }
