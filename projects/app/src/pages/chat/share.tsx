@@ -38,6 +38,8 @@ import { ChatSourceEnum } from '@fastgpt/global/core/chat/constants';
 import { useI18nLng } from '@fastgpt/web/hooks/useI18n';
 import { AppSchema } from '@fastgpt/global/core/app/type';
 
+import { jwtCassWechat } from '@/service/common/system/index';
+
 const CustomPluginRunBox = dynamic(() => import('./components/CustomPluginRunBox'));
 
 type Props = {
@@ -50,13 +52,14 @@ type Props = {
   customUid: string;
   showRawSource: boolean;
   showNodeStatus: boolean;
-  cassWebAuthToken: string;
+  cassWebUserSub: string;
+  cassWechatUser: string;
 };
 
 const OutLink = (props: Props) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { showRawSource, showNodeStatus, cassWebAuthToken } = props;
+  const { showRawSource, showNodeStatus, cassWebUserSub, cassWechatUser } = props;
   const {
     shareId = '',
     showHistory = '1',
@@ -160,7 +163,8 @@ const OutLink = (props: Props) => {
           variables: {
             ...variables,
             ...customVariables,
-            cassWebAuthToken
+            cassWebUserSub,
+            cassWechatUser
           },
           responseChatItemId,
           chatId: completionChatId,
@@ -206,7 +210,8 @@ const OutLink = (props: Props) => {
       setChatBoxData,
       forbidLoadChat,
       onChangeChatId,
-      cassWebAuthToken
+      cassWebUserSub,
+      cassWechatUser
     ]
   );
 
@@ -360,7 +365,9 @@ export async function getServerSideProps(context: any) {
   const shareId = context?.query?.shareId || '';
   const authToken = context?.query?.authToken || '';
   const customUid = context?.query?.customUid || '';
+
   const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
+  const cassWechatCode = context?.query?.code || '';
 
   const app = await (async () => {
     try {
@@ -379,6 +386,11 @@ export async function getServerSideProps(context: any) {
     }
   })();
 
+  let cassWechatToken = '';
+  if (cassWechatCode) {
+    cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
+  }
+
   return {
     props: {
       appId: String(app?.appId) ?? '',
@@ -389,7 +401,8 @@ export async function getServerSideProps(context: any) {
       showNodeStatus: app?.showNodeStatus ?? false,
       shareId: shareId ?? '',
       authToken: authToken ?? '',
-      cassWebAuthToken: cassWebAuthToken ?? '',
+      cassWebUserSub: cassWebAuthToken ?? '',
+      cassWechatUser: cassWechatToken ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }

@@ -26,8 +26,7 @@ const nextConfig = {
 
     // Prevent specific packages from being externalized
     config.externals = [...(config.externals || [])].filter(
-      (external) => typeof external !== 'string' || 
-      !['vega', 'vega-lite'].includes(external)
+      (external) => typeof external !== 'string' || !['vega', 'vega-lite'].includes(external)
     );
 
     config.module = {
@@ -97,6 +96,14 @@ const nextConfig = {
     ],
     outputFileTracingRoot: path.join(__dirname, '../../'),
     instrumentationHook: true
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/fastgpt/chat',
+        destination: '/api/fastgpt/chat'
+      }
+    ];
   }
 };
 

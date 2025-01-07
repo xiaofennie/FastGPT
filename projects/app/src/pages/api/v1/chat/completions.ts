@@ -61,7 +61,7 @@ import { WORKFLOW_MAX_RUN_TIMES } from '@fastgpt/service/core/workflow/constants
 import { getPluginInputsFromStoreNodes } from '@fastgpt/global/core/app/plugin/utils';
 import { ExternalProviderType } from '@fastgpt/global/core/workflow/runtime/type';
 
-import { verifyandParseJwt } from '@/service/common/system/index';
+import { parseCassJwt } from '@/service/common/system/index';
 
 type FastGptWebChatProps = {
   chatId?: string; // undefined: get histories from messages, '': new chat, 'xxxxx': get histories from db
@@ -123,9 +123,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     metadata
   } = req.body as Props;
 
-  if (variables.cassWebAuthToken) {
-    const userInfo = verifyandParseJwt(variables.cassWebAuthToken);
-    variables.cassWebAuthToken = (userInfo?.sub as string) || '';
+  if (variables.cassWebUserSub) {
+    variables.cassWebUserSub = await parseCassJwt(variables.cassWebUserSub);
+    console.info('cass电商用户', variables.cassWebUserSub);
+  } else if (variables.cassWechatUser && shareId) {
+    variables.cassWechatUser = await parseCassJwt(variables.cassWechatUser);
+    console.info('企微用户', variables.cassWechatUser);
   }
 
   const originIp = requestIp.getClientIp(req);

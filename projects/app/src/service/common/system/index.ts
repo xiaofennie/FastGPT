@@ -12,7 +12,12 @@ import { SystemPluginTemplateItemType } from '@fastgpt/global/core/workflow/type
 import { defaultGroup, defaultTemplateTypes } from '@fastgpt/web/core/workflow/constants';
 import { MongoPluginGroups } from '@fastgpt/service/core/app/plugin/pluginGroupSchema';
 import { MongoTemplateTypes } from '@fastgpt/service/core/app/templates/templateTypeSchema';
+
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { addLog } from '@fastgpt/service/common/system/log';
+import { connectToDatabase } from '@/service/mongo';
+import { connectionMongo } from '@fastgpt/service/common/mongo';
+import axios from 'axios';
 
 export const readConfigData = (name: string) => {
   const splitName = name.split('.');
@@ -208,9 +213,9 @@ export async function initAppTemplateTypes() {
   }
 }
 
-export function verifyandParseJwt(token: string): JwtPayload | string | null {
+export function jwtCassWeb(token: string): JwtPayload | string | null {
   try {
-    const publicKey = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, '\n');
+    const publicKey = process.env.CASS_WEB_JWT_PUBLIC_KEY?.replace(/\\n/g, '\n');
     if (!publicKey) {
       return null;
     }
@@ -221,12 +226,102 @@ export function verifyandParseJwt(token: string): JwtPayload | string | null {
     }) as JwtPayload;
     if (verifyJwt) {
       const decoded = jwt.decode(token);
-      return decoded;
+      const jwtSecret = process.env.USER_JWT_SECRET;
+
+      if (!jwtSecret) {
+        addLog.error('jwtCassWeb failed: jwtSecret is empty');
+        return null;
+      }
+
+      if (decoded && decoded.sub) {
+        const cassWebToken = jwt.sign(
+          {
+            sub: decoded.sub // sub 是 JWT 标准字段，用于存储主体
+          },
+          jwtSecret
+        );
+        return cassWebToken;
+      }
+      addLog.error('jwtCassWeb failed: decoded.sub is empty', decoded);
+      return null;
     } else {
       return null;
     }
   } catch (error) {
-    console.error('JWT verification failed:', error);
+    addLog.error('jwtCassWeb failed:', error);
     return null;
   }
+}
+
+export function jwtCassWechat(appId: string | undefined, code: String) {
+  return new Promise(async (resolve) => {
+    if (!appId) {
+      addLog.error('jwtCassWechat: appId为空');
+      resolve(null);
+    }
+
+    await connectToDatabase();
+
+    // 获取数据库实例
+    const db = connectionMongo.connection.db;
+
+    // 获取集合
+    const collection = db.collection('casscorpsecret');
+
+    const result = await collection.findOne({ appId });
+
+    if (!result) {
+      addLog.error('jwtCassWechat error: casscorpsecret找不到appId', appId);
+      resolve(null);
+    }
+
+    const corpsecret = result?.corpsecret;
+
+    const accessTokenRes = await axios.get(`
+      https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=wx34b4ed8f75c6657a&corpsecret=${corpsecret}`);
+
+    const accessToken = accessTokenRes?.data?.access_token;
+
+    // console.info('jwtCassWechat accessToken', accessToken);
+
+    const userInfoRes = await axios.get(
+      `https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?access_token=${accessToken}&code=${code}`
+    );
+
+    // console.info('jwtCassWechat userInfoRes', userInfoRes?.data);
+
+    const jwtSecret = process.env.USER_JWT_SECRET;
+
+    if (!jwtSecret) {
+      addLog.error('jwtCassWechat error: USER_JWT_SECRET为空');
+      resolve(null);
+    }
+
+    if (jwtSecret && userInfoRes?.data.userid) {
+      const cass_wechat_token = jwt.sign(
+        {
+          sub: userInfoRes?.data.userid // sub 是 JWT 标准字段，用于存储主体
+        },
+        jwtSecret
+      );
+      resolve(cass_wechat_token);
+    } else {
+      addLog.error('jwtCassWechat error: userInfoRes?.data.userid为空', userInfoRes?.data);
+      resolve(null);
+    }
+  });
+}
+
+export function parseCassJwt(token: string) {
+  return new Promise((resolve) => {
+    const key = process.env.USER_JWT_SECRET as string;
+
+    jwt.verify(token, key, function (err: any, decoded: any) {
+      if (!err) {
+        resolve(decoded.sub || '');
+      } else {
+        resolve('');
+      }
+    });
+  });
 }
