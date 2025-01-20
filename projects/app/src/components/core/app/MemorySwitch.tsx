@@ -98,7 +98,7 @@ const MemorySwitch = ({
                   <FormLabel mb={1}>最低相关度</FormLabel>
                   <NumberInput
                     size="sm"
-                    min={0.1}
+                    min={0}
                     max={1}
                     step={0.1}
                     precision={1}

@@ -253,17 +253,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // console.info('chatConfig', chatConfig.memoryConfig);
     // 记忆查询
     if (chatConfig?.memoryConfig?.open) {
-      variables = {
+      let memoryParams = {
         query: messages[messages.length - 1].content,
         user_id: variables.cassWebUser || variables.cassWebUserSub || variables.cassWechatUser,
         agent_id: app._id.toString(),
         limit: chatConfig?.memoryConfig.limit || 10,
-        min_score: chatConfig?.memoryConfig.minScore || 0.8,
+        min_score: chatConfig?.memoryConfig.minScore,
         filter: chatConfig?.memoryConfig.metadata || {}
       };
 
-      const memoryRes = await getMemory(variables);
-      console.info('memoryRes', variables, memoryRes.data.data);
+      const memoryRes = await getMemory(memoryParams);
+      console.info('memoryRes', memoryParams, memoryRes.data.data);
       variables.cassRelevantMemory = memoryRes.data.data.map((item: any) => item.memory);
     }
 
