@@ -62,6 +62,7 @@ import { getPluginInputsFromStoreNodes } from '@fastgpt/global/core/app/plugin/u
 import { ExternalProviderType } from '@fastgpt/global/core/workflow/runtime/type';
 
 import { parseCassJwt } from '@/service/common/system/index';
+import { getMemory } from '@/service/memory/index';
 
 type FastGptWebChatProps = {
   chatId?: string; // undefined: get histories from messages, '': new chat, 'xxxxx': get histories from db
@@ -129,6 +130,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   } else if (variables.cassWechatUser && shareId) {
     variables.cassWechatUser = await parseCassJwt(variables.cassWechatUser);
     console.info('企微用户', variables.cassWechatUser);
+  } else if (variables.cassWebUser) {
+    variables.cassWebUser = variables.cassWebUser;
+    console.info('cass公号', variables.cassWebUser);
   }
 
   const originIp = requestIp.getClientIp(req);
@@ -245,6 +249,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       getAppLatestVersion(app._id, app),
       MongoChat.findOne({ appId: app._id, chatId }, 'source variableList variables')
     ]);
+
+    // console.info('chatConfig', chatConfig.memoryConfig);
+    // 记忆查询
+    if (chatConfig?.memoryConfig?.open) {
+      variables = {
+        query: messages[messages.length - 1].content,
+        user_id: variables.cassWebUser || variables.cassWebUserSub || variables.cassWechatUser,
+        agent_id: app._id.toString(),
+        limit: chatConfig?.memoryConfig.limit || 10,
+        min_score: chatConfig?.memoryConfig.minScore || 0.8,
+        filter: chatConfig?.memoryConfig.metadata || {}
+      };
+
+      const memoryRes = await getMemory(variables);
+      console.info('memoryRes', variables, memoryRes.data.data);
+      variables.cassRelevantMemory = memoryRes.data.data.map((item: any) => item.memory);
+    }
 
     // Get store variables(Api variable precedence)
     if (chatDetail?.variables) {

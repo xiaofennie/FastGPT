@@ -54,12 +54,13 @@ type Props = {
   showNodeStatus: boolean;
   cassWebUserSub: string;
   cassWechatUser: string;
+  cassWebUser: string;
 };
 
 const OutLink = (props: Props) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { showRawSource, showNodeStatus, cassWebUserSub, cassWechatUser } = props;
+  const { showRawSource, showNodeStatus, cassWebUserSub, cassWechatUser, cassWebUser } = props;
   const {
     shareId = '',
     showHistory = '1',
@@ -164,7 +165,8 @@ const OutLink = (props: Props) => {
             ...variables,
             ...customVariables,
             cassWebUserSub,
-            cassWechatUser
+            cassWechatUser,
+            cassWebUser
           },
           responseChatItemId,
           chatId: completionChatId,
@@ -211,7 +213,8 @@ const OutLink = (props: Props) => {
       forbidLoadChat,
       onChangeChatId,
       cassWebUserSub,
-      cassWechatUser
+      cassWechatUser,
+      cassWebUser
     ]
   );
 
@@ -368,6 +371,7 @@ export async function getServerSideProps(context: any) {
 
   const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
   const cassWechatCode = context?.query?.code || '';
+  const cassWebUser = context?.query?.cassWebUser || '';
 
   const app = await (async () => {
     try {
@@ -403,6 +407,7 @@ export async function getServerSideProps(context: any) {
       authToken: authToken ?? '',
       cassWebUserSub: cassWebAuthToken ?? '',
       cassWechatUser: cassWechatToken ?? '',
+      cassWebUser: cassWebUser ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }

@@ -46,6 +46,8 @@ import { getSystemTime } from '@fastgpt/global/common/time/timezone';
 import { ChatRoleEnum, ChatSourceEnum } from '@fastgpt/global/core/chat/constants';
 import { saveChat, updateInteractiveChat } from '@fastgpt/service/core/chat/saveChat';
 
+import { getMemory } from '@/service/memory/index';
+
 export type Props = {
   messages: ChatCompletionMessageParam[];
   responseChatItemId: string;
@@ -127,6 +129,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // auth balance
       getUserChatInfoAndAuthTeamPoints(tmbId)
     ]);
+
+    // 记忆查询
+    if (chatConfig?.memoryConfig?.open) {
+      let memoryParams = {
+        query: messages[messages.length - 1].content,
+        user_id: '',
+        agent_id: app._id.toString(),
+        limit: chatConfig?.memoryConfig.limit || 10,
+        min_score: chatConfig?.memoryConfig.minScore || 0.8,
+        filter: chatConfig?.memoryConfig.metadata || {}
+      };
+
+      const memoryRes = await getMemory(memoryParams);
+      console.info('memoryRes', variables, memoryRes.data.data);
+      variables.cassRelevantMemory = memoryRes.data.data.map((item: any) => item.memory);
+    }
 
     if (chatDetail?.variables) {
       variables = {
