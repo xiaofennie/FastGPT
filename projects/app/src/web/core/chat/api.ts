@@ -49,11 +49,17 @@ export const getChatHistories = (data: PaginationProps<GetHistoriesProps>) =>
 
 export const getChatHistoriesV2 = (data: PaginationProps<GetHistoriesProps>) =>
   POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistoriesV2', data);
+
+export const getChatUser = (appId: string, chatId: string) =>
+  GET<any>(`/core/chat/getChatUser`, { appId, chatId });
 /**
  * get detail responseData by dataId appId chatId
  */
 export const getChatResData = (data: getResDataQuery) =>
   GET<ChatHistoryItemResType[]>(`/core/chat/getResData`, data);
+
+export const getChatResDataV2 = (data: getResDataQuery) =>
+  GET<ChatHistoryItemResType[]>(`/core/chat/getResDataV2`, data);
 
 export const getChatRecords = (data: getPaginationRecordsBody) =>
   POST<getPaginationRecordsResponse>('core/chat/getPaginationRecords', data);
