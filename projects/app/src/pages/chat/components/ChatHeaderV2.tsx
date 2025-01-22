@@ -55,7 +55,11 @@ const ChatHeader = ({
       if (appId && chatId) {
         const res = await getChatUser(appId, chatId);
         if (res.length) {
-          setUserInfo(`${res[0].company_display_name || res[0].deptname}-${res[0].username}`);
+          setUserInfo(
+            `${res[0].company_display_name || res[0].deptname}-${res[0].username}(${res[0].userno || res[0].user_login_name})`
+          );
+        } else {
+          setUserInfo('');
         }
       }
     };

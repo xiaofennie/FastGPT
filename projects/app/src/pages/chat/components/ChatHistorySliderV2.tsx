@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Box, Button, Flex, useTheme, IconButton } from '@chakra-ui/react';
 import { useSystem } from '@fastgpt/web/hooks/useSystem';
 import { useEditTitle } from '@/web/common/hooks/useEditTitle';
@@ -35,7 +35,7 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
   const { isPc } = useSystem();
   const { userInfo } = useUserStore();
 
-  const { appId, chatId: activeChatId } = useChatStore();
+  const { appId, chatId: activeChatId, setChatId } = useChatStore();
   const onChangeChatId = useContextSelector(ChatContext, (v) => v.onChangeChatId);
   const isLoading = useContextSelector(ChatContext, (v) => v.isLoading);
   const ScrollData = useContextSelector(ChatContext, (v) => v.ScrollData);
@@ -57,15 +57,16 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
         updateTime: item.updateTime
       };
     });
-    const newChat: HistoryItemType = {
-      id: activeChatId,
-      title: t('common:core.chat.New Chat'),
-      updateTime: new Date()
-    };
-    const activeChat = histories.find((item) => item.chatId === activeChatId);
 
-    return !activeChat ? [newChat].concat(formatHistories) : formatHistories;
-  }, [activeChatId, histories, t]);
+    return formatHistories;
+  }, [histories]);
+
+  useEffect(() => {
+    const activeChat = histories.find((item) => item.chatId === activeChatId);
+    if (!activeChat && histories.length > 0) {
+      setChatId(histories[0]?.chatId);
+    }
+  }, [histories, activeChatId, setChatId]);
 
   // custom title edit
   const { onOpenModal, EditModal: EditTitleModal } = useEditTitle({
