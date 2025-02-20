@@ -89,7 +89,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
     const chatMessages = GPTMessages2Chats(messages);
     // console.log(JSON.stringify(chatMessages, null, 2), '====', chatMessages.length);
-
     /* user auth */
     const { app, teamId, tmbId } = await authApp({
       req,
@@ -132,18 +131,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // 记忆查询
     if (chatConfig?.memoryConfig?.open) {
-      let memoryParams = {
-        query: messages[messages.length - 1].content,
-        user_id: '',
-        agent_id: app._id.toString(),
-        limit: chatConfig?.memoryConfig.limit || 10,
-        min_score: chatConfig?.memoryConfig.minScore || 0.8,
-        filter: chatConfig?.memoryConfig.metadata || {}
-      };
+      let queryMessage = '';
+      let content = messages[messages.length - 1].content;
 
-      const memoryRes = await getMemory(memoryParams);
-      console.info('memoryRes', variables, memoryRes.data.data);
-      variables.cassRelevantMemory = memoryRes.data.data.map((item: any) => item.memory);
+      if (Array.isArray(content)) {
+        // @ts-ignore
+        queryMessage = content.find((item: any) => item.type === 'text')?.text || '';
+      } else if (typeof content === 'string') {
+        queryMessage = content;
+      }
+
+      if (queryMessage) {
+        let memoryParams = {
+          query: queryMessage,
+          user_id: '',
+          agent_id: app._id.toString(),
+          limit: chatConfig?.memoryConfig.limit || 10,
+          min_score: chatConfig?.memoryConfig.minScore || 0.8,
+          filter: chatConfig?.memoryConfig.metadata || {}
+        };
+
+        console.log(memoryParams);
+
+        const memoryRes = await getMemory(memoryParams);
+        console.info('memoryRes', variables, memoryRes.data.data);
+        variables.cassRelevantMemory = memoryRes.data.data.map((item: any) => item.memory);
+      } else {
+        variables.cassRelevantMemory = [];
+      }
     }
 
     if (chatDetail?.variables) {
