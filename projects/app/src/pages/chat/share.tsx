@@ -54,13 +54,13 @@ type Props = {
   showNodeStatus: boolean;
   cassWebUserSub: string;
   cassWechatUser: string;
-  cassWebUser: string;
+  cassAppUser: string;
 };
 
 const OutLink = (props: Props) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { showRawSource, showNodeStatus, cassWebUserSub, cassWechatUser, cassWebUser } = props;
+  const { showRawSource, showNodeStatus, cassWebUserSub, cassWechatUser, cassAppUser } = props;
   const {
     shareId = '',
     showHistory = '1',
@@ -158,15 +158,36 @@ const OutLink = (props: Props) => {
         '*'
       );
 
+      // cassUserType: "USERID", "USERNUMBER"
+      // cassUserOrigin: 'WEB', 'WECHAT', 'APP'
+
+      let cassUserType,
+        cassUserOrigin,
+        cassUserId = '';
+
+      if (cassWebUserSub) {
+        cassUserType = 'USER_LOGIN_ID';
+        cassUserOrigin = 'WEB';
+        cassUserId = cassWebUserSub;
+      } else if (cassWechatUser) {
+        cassUserType = 'USER_NUMBER';
+        cassUserOrigin = 'WECHAT';
+        cassUserId = cassWechatUser;
+      } else if (cassAppUser) {
+        cassUserType = 'USER_LOGIN_ID';
+        cassUserOrigin = 'APP';
+        cassUserId = cassAppUser;
+      }
+
       const { responseText, responseData } = await streamFetch({
         data: {
           messages: histories,
           variables: {
             ...variables,
             ...customVariables,
-            cassWebUserSub,
-            cassWechatUser,
-            cassWebUser
+            cassUserType,
+            cassUserOrigin,
+            cassUserId
           },
           responseChatItemId,
           chatId: completionChatId,
@@ -214,7 +235,7 @@ const OutLink = (props: Props) => {
       onChangeChatId,
       cassWebUserSub,
       cassWechatUser,
-      cassWebUser
+      cassAppUser
     ]
   );
 
@@ -371,7 +392,9 @@ export async function getServerSideProps(context: any) {
 
   const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
   const cassWechatCode = context?.query?.code || '';
-  const cassWebUser = context?.query?.cassWebUser || '';
+
+  const cookies = context.req.cookies;
+  const cassAppUser = cookies.jwt || '';
 
   const app = await (async () => {
     try {
@@ -407,7 +430,7 @@ export async function getServerSideProps(context: any) {
       authToken: authToken ?? '',
       cassWebUserSub: cassWebAuthToken ?? '',
       cassWechatUser: cassWechatToken ?? '',
-      cassWebUser: cassWebUser ?? '',
+      cassAppUser: cassAppUser ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }

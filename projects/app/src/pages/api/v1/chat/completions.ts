@@ -61,7 +61,7 @@ import { WORKFLOW_MAX_RUN_TIMES } from '@fastgpt/service/core/workflow/constants
 import { getPluginInputsFromStoreNodes } from '@fastgpt/global/core/app/plugin/utils';
 import { ExternalProviderType } from '@fastgpt/global/core/workflow/runtime/type';
 
-import { parseCassJwt } from '@/service/common/system/index';
+import { parseCassJwt, parseCassAppJwt } from '@/service/common/system/index';
 import { getMemory } from '@/service/memory/index';
 
 type FastGptWebChatProps = {
@@ -124,16 +124,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     metadata
   } = req.body as Props;
 
-  if (variables.cassWebUserSub) {
-    variables.cassWebUserSub = await parseCassJwt(variables.cassWebUserSub);
-    console.info('cass电商用户', variables.cassWebUserSub);
-  } else if (variables.cassWechatUser && shareId) {
-    variables.cassWechatUser = await parseCassJwt(variables.cassWechatUser);
-    console.info('企微用户', variables.cassWechatUser);
-  } else if (variables.cassWebUser) {
-    variables.cassWebUser = variables.cassWebUser;
-    console.info('cass公号', variables.cassWebUser);
+  if (variables.cassUserOrigin && variables.cassUserId) {
+    switch (variables.cassUserOrigin) {
+      case 'WEB':
+        variables.cassUserId = await parseCassJwt(variables.cassUserId);
+        console.info('cass的WEB用户', variables.cassUserId);
+        break;
+      case 'WECHAT':
+        variables.cassUserId = await parseCassJwt(variables.cassUserId);
+        console.info('cass的WECHAT用户', variables.cassUserId);
+        break;
+      case 'APP':
+        variables.cassUserId = await parseCassAppJwt(variables.cassUserId);
+        console.info('cass的APP用户', variables.cassUserId);
+        break;
+    }
   }
+
+  // if (variables.cassWebUserSub) {
+  //   variables.cassWebUserSub = await parseCassJwt(variables.cassWebUserSub);
+  //   console.info('cass电商用户', variables.cassWebUserSub);
+  // } else if (variables.cassWechatUser && shareId) {
+  //   variables.cassWechatUser = await parseCassJwt(variables.cassWechatUser);
+  //   console.info('企微用户', variables.cassWechatUser);
+  // } else if (variables.cassWebUser) {
+  //   variables.cassWebUser = variables.cassWebUser;
+  //   console.info('cass工号', variables.cassWebUser);
+  // }
 
   const originIp = requestIp.getClientIp(req);
 

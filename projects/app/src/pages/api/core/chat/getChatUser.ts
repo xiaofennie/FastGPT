@@ -20,8 +20,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const result = await MongoChat.findOne({ appId, chatId }, 'variables');
   const variables = result?.variables || {};
+  const userLoginId =
+    variables.cassWebUserSub ||
+    (variables.cassUserOrigin == 'USER_LOGIN_ID' && variables.cassUserId);
+  const userNumber =
+    variables.cassWechatUser || (variables.cassUserOrigin == 'USER_NUMBER' && variables.cassUserId);
 
-  if (variables.cassWebUserSub) {
+  if (userLoginId) {
     const userRes = await axios.post(
       `${process.env.CASS_CURRENT_URI}/api/v1/chat/completions`,
       {
@@ -41,16 +46,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
       }
     );
-    console.log(
-      '1',
-      process.env.CASS_SUB_USER_KEY,
-      variables.cassWebUserSub,
-      userRes.data.choices[0].message
-    );
     let userInfoJson = userRes.data.choices[0].message.content || '';
     let userInfo = JSON.parse(userInfoJson);
     return userInfo;
-  } else if (variables.cassWechatUser) {
+  } else if (userNumber) {
     const userRes = await axios.post(
       `${process.env.CASS_CURRENT_URI}/api/v1/chat/completions`,
       {

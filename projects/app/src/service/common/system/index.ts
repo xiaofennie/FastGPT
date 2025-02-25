@@ -325,3 +325,17 @@ export function parseCassJwt(token: string) {
     });
   });
 }
+
+export function parseCassAppJwt(token: string) {
+  return new Promise((resolve) => {
+    const key = process.env.CASS_APP_JWT_PUBLIC_KEY as string;
+
+    jwt.verify(token, key, function (err: any, decoded: any) {
+      if (!err) {
+        resolve(decoded.userLoginId || '');
+      } else {
+        resolve('');
+      }
+    });
+  });
+}
