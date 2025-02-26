@@ -392,14 +392,14 @@ export async function dispatchWorkFlow(data: Props): Promise<DispatchFlowRespons
     const nodeRunResult = await (() => {
       if (status === 'run') {
         nodeRunBeforeHook(node);
-        addLog.debug(`[dispatchWorkFlow] nodeRunWithActive: ${node.name}`);
+        addLog.debug(`[dispatchWorkFlow] nodeRunWithActive: ${node.name},${node.flowNodeType}`);
         return nodeRunWithActive(node);
       }
       if (status === 'skip' && !skippedNodeIdList.has(node.nodeId)) {
         nodeRunBeforeHook(node);
         props.maxRunTimes -= 0.1;
         skippedNodeIdList.add(node.nodeId);
-        addLog.debug(`[dispatchWorkFlow] nodeRunWithSkip: ${node.name}`);
+        addLog.debug(`[dispatchWorkFlow] nodeRunWithSkip: ${node.name},${node.flowNodeType}`);
         return nodeRunWithSkip(node);
       }
     })();

@@ -47,12 +47,14 @@ const TeamSchema = new Schema({
       type: String
     }
   },
+  // 团队的 OpenAI API 配置
   openaiAccount: {
     type: {
       key: String,
       baseUrl: String
     }
   },
+  // 团队的公共外部变量
   externalWorkflowVariables: {
     type: Object,
     default: {}

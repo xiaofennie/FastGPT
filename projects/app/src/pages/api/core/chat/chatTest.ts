@@ -126,7 +126,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }),
       MongoChat.findOne({ appId: app._id, chatId }, 'source variableList variables'),
       // auth balance
-      getUserChatInfoAndAuthTeamPoints(tmbId)
+      getUserChatInfoAndAuthTeamPoints(tmbId, teamId)
     ]);
 
     // 记忆查询

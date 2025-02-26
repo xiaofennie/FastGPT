@@ -669,7 +669,7 @@ const authHeaderRequest = async ({
   })();
 
   const [{ timezone, externalProvider }, chat] = await Promise.all([
-    getUserChatInfoAndAuthTeamPoints(tmbId),
+    getUserChatInfoAndAuthTeamPoints(tmbId, teamId),
     MongoChat.findOne({ appId, chatId }).lean()
   ]);
 
