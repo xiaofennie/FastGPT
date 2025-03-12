@@ -328,8 +328,10 @@ export function parseCassJwt(token: string) {
 export function parseCassAppJwt(token: string) {
   return new Promise((resolve) => {
     const key = process.env.CASS_APP_JWT_PUBLIC_KEY as string;
+    console.log('cassAppJwt', key, token);
 
     jwt.verify(token, key, function (err: any, decoded: any) {
+      console.log('cassAppJwt1', decoded);
       if (!err) {
         resolve(decoded.userLoginId || '');
       } else {
