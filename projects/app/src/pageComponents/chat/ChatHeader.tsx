@@ -69,7 +69,7 @@ const ChatHeader = ({
       )}
 
       {/* control */}
-      {!isPlugin && <ToolMenu history={history} />}
+      {/* {!isPlugin && <ToolMenu history={history} />} */}
     </Flex>
   );
 };
