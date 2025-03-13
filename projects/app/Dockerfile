@@ -1,5 +1,5 @@
 # --------- install dependence -----------
-FROM node:20.14.0-alpine AS maindeps
+FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS maindeps
 WORKDIR /app
 
 ARG proxy
@@ -22,7 +22,7 @@ RUN if [ -z "$proxy" ]; then \
     fi
 
 # --------- builder -----------
-FROM node:20.14.0-alpine AS builder
+FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS builder
 WORKDIR /app
 
 ARG proxy
@@ -44,7 +44,7 @@ ENV NEXT_PUBLIC_BASE_URL=$base_url
 RUN pnpm --filter=app build
 
 # --------- runner -----------
-FROM node:20.14.0-alpine AS runner
+FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS runner
 WORKDIR /app
 
 ARG proxy

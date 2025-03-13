@@ -61,6 +61,9 @@ import { WORKFLOW_MAX_RUN_TIMES } from '@fastgpt/service/core/workflow/constants
 import { getPluginInputsFromStoreNodes } from '@fastgpt/global/core/app/plugin/utils';
 import { ExternalProviderType } from '@fastgpt/global/core/workflow/runtime/type';
 
+import { parseCassJwt, parseCassAppJwt } from '@/service/common/system/index';
+import { getMemory } from '@/service/memory/index';
+
 type FastGptWebChatProps = {
   chatId?: string; // undefined: get histories from messages, '': new chat, 'xxxxx': get histories from db
   appId?: string;
@@ -120,6 +123,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     responseChatItemId = getNanoid(),
     metadata
   } = req.body as Props;
+
+  if (variables.cassUserOrigin && variables.cassUserId) {
+    switch (variables.cassUserOrigin) {
+      case 'WEB':
+        variables.cassUserId = await parseCassJwt(variables.cassUserId);
+        console.info('cass的WEB用户', variables.cassUserId);
+        break;
+      case 'WECHAT':
+        variables.cassUserId = await parseCassJwt(variables.cassUserId);
+        console.info('cass的WECHAT用户', variables.cassUserId);
+        break;
+      case 'APP':
+        variables.cassUserId = await parseCassAppJwt(variables.cassUserId);
+        console.info('cass的APP用户', variables.cassUserId);
+        break;
+    }
+  }
+
+  // if (variables.cassWebUserSub) {
+  //   variables.cassWebUserSub = await parseCassJwt(variables.cassWebUserSub);
+  //   console.info('cass电商用户', variables.cassWebUserSub);
+  // } else if (variables.cassWechatUser && shareId) {
+  //   variables.cassWechatUser = await parseCassJwt(variables.cassWechatUser);
+  //   console.info('企微用户', variables.cassWechatUser);
+  // } else if (variables.cassWebUser) {
+  //   variables.cassWebUser = variables.cassWebUser;
+  //   console.info('cass工号', variables.cassWebUser);
+  // }
 
   const originIp = requestIp.getClientIp(req);
 
@@ -235,6 +266,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       getAppLatestVersion(app._id, app),
       MongoChat.findOne({ appId: app._id, chatId }, 'source variableList variables')
     ]);
+
+    // console.info('chatConfig', chatConfig.memoryConfig);
+    // 记忆查询
+    if (chatConfig?.memoryConfig?.open) {
+      let queryMessage = '';
+      let content = messages[messages.length - 1].content;
+
+      if (Array.isArray(content)) {
+        // @ts-ignore
+        queryMessage = content.find((item: any) => item.type === 'text')?.text || '';
+      } else if (typeof content === 'string') {
+        queryMessage = content;
+      }
+
+      if (queryMessage) {
+        let memoryParams = {
+          query: queryMessage,
+          user_id: '',
+          agent_id: app._id.toString(),
+          limit: chatConfig?.memoryConfig.limit || 10,
+          min_score: chatConfig?.memoryConfig.minScore || 0.8,
+          filter: chatConfig?.memoryConfig.metadata || {}
+        };
+
+        console.log(memoryParams);
+
+        const memoryRes = await getMemory(memoryParams);
+        console.info('memoryRes', variables, memoryRes.data.data);
+        variables.cassRelevantMemory = memoryRes.data.data.map((item: any) => item.memory);
+      } else {
+        variables.cassRelevantMemory = [];
+      }
+    }
 
     // Get store variables(Api variable precedence)
     if (chatDetail?.variables) {
@@ -609,7 +673,7 @@ const authHeaderRequest = async ({
   })();
 
   const [{ timezone, externalProvider }, chat] = await Promise.all([
-    getUserChatInfoAndAuthTeamPoints(tmbId),
+    getUserChatInfoAndAuthTeamPoints(tmbId, teamId),
     MongoChat.findOne({ appId, chatId }).lean()
   ]);
 

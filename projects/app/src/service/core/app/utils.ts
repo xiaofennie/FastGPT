@@ -23,6 +23,7 @@ import { UserChatItemValueItemType } from '@fastgpt/global/core/chat/type';
 import { saveChat } from '@fastgpt/service/core/chat/saveChat';
 import { getAppLatestVersion } from '@fastgpt/service/core/app/version/controller';
 
+// 定时执行app
 export const getScheduleTriggerApp = async () => {
   // 1. Find all the app
   const apps = await retryFn(() => {
@@ -39,7 +40,10 @@ export const getScheduleTriggerApp = async () => {
         if (!app.scheduledTriggerConfig) return;
         // random delay 0 ~ 60s
         await delay(Math.floor(Math.random() * 60 * 1000));
-        const { timezone, externalProvider } = await getUserChatInfoAndAuthTeamPoints(app.tmbId);
+        const { timezone, externalProvider } = await getUserChatInfoAndAuthTeamPoints(
+          app.tmbId,
+          app.teamId
+        );
 
         // Get app latest version
         const { nodes, edges, chatConfig } = await getAppLatestVersion(app._id, app);
