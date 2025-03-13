@@ -109,6 +109,13 @@ export type AppChatConfigType = {
 
   // plugin
   instruction?: string;
+
+  memoryConfig?: {
+    open: boolean;
+    limit: number;
+    minScore: number;
+    metadata: Record<string, any>;
+  };
 };
 export type SettingAIDataType = {
   model: string;

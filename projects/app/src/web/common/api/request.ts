@@ -110,7 +110,9 @@ function responseError(err: any) {
   }
   // 有报错响应
   if (err?.code in TOKEN_ERROR_CODE || err?.response?.data?.code in TOKEN_ERROR_CODE) {
-    if (!['/chat/share', '/chat/team', '/login'].includes(window.location.pathname)) {
+    if (
+      !['/chat/share', '/chat/analyse', '/chat/team', '/login'].includes(window.location.pathname)
+    ) {
       clearToken();
       window.location.replace(
         getWebReqUrl(`/login?lastRoute=${encodeURIComponent(location.pathname + location.search)}`)
