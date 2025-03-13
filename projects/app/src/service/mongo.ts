@@ -26,9 +26,9 @@ export async function initRootUser(retry = 3): Promise<any> {
     await mongoSessionRun(async (session) => {
       // init root user
       if (rootUser) {
-        await rootUser.updateOne({
-          password: hashStr(psw)
-        });
+        // await rootUser.updateOne({
+        //   password: hashStr(psw)
+        // });
       } else {
         const [{ _id }] = await MongoUser.create(
           [
@@ -43,11 +43,11 @@ export async function initRootUser(retry = 3): Promise<any> {
       }
       // init root team
       await createDefaultTeam({ userId: rootId, session });
-    });
 
-    console.log(`root user init:`, {
-      username: 'root',
-      password: psw
+      console.log(`root user init:`, {
+        username: 'root',
+        password: psw
+      });
     });
   } catch (error) {
     if (retry > 0) {

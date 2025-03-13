@@ -1,6 +1,7 @@
 import { Client as PgClient } from 'pg'; // PostgreSQL 客户端
 import mysql from 'mysql2/promise'; // MySQL 客户端
 import mssql from 'mssql'; // SQL Server 客户端
+import { createConnection } from 'doris2/promise'; // Doris 客户端 - Promise 版本
 
 type Props = {
   databaseType: string;
@@ -67,6 +68,18 @@ const main = async ({
 
       result = await pool.query(sql);
       await pool.close();
+    } else if (databaseType === 'Doris') {
+      const connection = await createConnection({
+        host,
+        port: parseInt(port, 10),
+        database: databaseName,
+        user,
+        password
+      });
+
+      const [rows] = await connection.query(sql);
+      result = rows;
+      await connection.end();
     }
     return {
       result

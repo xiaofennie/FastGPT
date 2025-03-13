@@ -23,6 +23,7 @@ import { FlowNodeTypeEnum } from '@fastgpt/global/core/workflow/node/constant';
 import { userFilesInput } from '@fastgpt/global/core/workflow/template/system/workflowStart';
 import Container from '../components/Container';
 import AutoExecConfig from '@/components/core/app/AutoExecConfig';
+import MemorySwitch from '@/components/core/app/MemorySwitch';
 
 type ComponentProps = {
   chatConfig: AppChatConfigType;
@@ -86,6 +87,9 @@ const NodeUserGuide = ({ data, selected }: NodeProps<FlowNodeItemType>) => {
             </Box>
             <Box mt={3} pt={3} borderTop={'base'} borderColor={'myGray.200'}>
               <QuestionInputGuide {...componentsProps} />
+            </Box>
+            <Box mt={3} pt={3} borderTop={'base'} borderColor={'myGray.200'}>
+              <MemoryGuide {...componentsProps} />
             </Box>
           </Container>
         </NodeCard>
@@ -283,4 +287,24 @@ function FileSelectConfig({ chatConfig: { fileSelectConfig }, setAppDetail }: Co
       }}
     />
   );
+}
+
+function MemoryGuide({
+  chatConfig: { memoryConfig = { open: false, limit: 10, minScore: 0, metadata: {} } },
+  setAppDetail
+}: ComponentProps) {
+  return memoryConfig ? (
+    <MemorySwitch
+      value={memoryConfig}
+      onChange={(e) => {
+        setAppDetail((state) => ({
+          ...state,
+          chatConfig: {
+            ...state.chatConfig,
+            memoryConfig: e
+          }
+        }));
+      }}
+    />
+  ) : null;
 }
