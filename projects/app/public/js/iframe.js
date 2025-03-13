@@ -2,7 +2,7 @@ function embedChatbot() {
   const chatBtnId = 'fastgpt-chatbot-button';
   const chatWindowId = 'fastgpt-chatbot-window';
   const script = document.getElementById('chatbot-iframe');
-  const botSrc = script?.getAttribute('data-bot-src');
+  var botSrc = script?.getAttribute('data-bot-src');
   const defaultOpen = script?.getAttribute('data-default-open') === 'true';
   const canDrag = script?.getAttribute('data-drag') === 'true';
   const MessageIcon =
@@ -31,17 +31,147 @@ function embedChatbot() {
   ChatBtnDiv.setAttribute('height', '100%');
   ChatBtnDiv.draggable = false;
 
-  const iframe = document.createElement('iframe');
-  iframe.allow = '*';
-  iframe.referrerPolicy = 'no-referrer';
-  iframe.title = 'FastGPT Chat Window';
-  iframe.id = chatWindowId;
-  iframe.src = botSrc;
-  iframe.style.cssText =
-    'border: none; position: fixed; flex-direction: column; justify-content: space-between; box-shadow: rgba(150, 150, 150, 0.2) 0px 10px 30px 0px, rgba(150, 150, 150, 0.2) 0px 0px 0px 1px; width: 375px; height: 667px; max-width: 90vw; max-height: 85vh; border-radius: 0.75rem; display: flex; z-index: 2147483647; overflow: hidden; left: unset; background-color: #F3F4F6;';
-  iframe.style.visibility = defaultOpen ? 'unset' : 'hidden';
+  let isResizing = false;
+  let currentX = 0;
+  let currentY = 0;
+  let initialWidth = 0;
+  let initialHeight = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+  let resizeDirection = '';
 
-  document.body.appendChild(iframe);
+  const globalOverlay = document.createElement('div');
+  globalOverlay.style.cssText =
+    'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; display: none; z-index: 2147483646; cursor: default;';
+  document.body.appendChild(globalOverlay);
+
+  fetch(botSrc, {
+    // mode: 'no-cors', // 添加no-cors模式来忽略跨域
+    headers: {
+      Accept: 'text/html',
+      'Content-Type': 'text/html'
+    }
+  })
+    .then((response) => {
+      // console.log('response status:', response.status);
+      return response.text();
+    })
+    .then((htmlContent) => {
+      // console.log('htmlContent', htmlContent);
+      const div = document.createElement('div');
+      div.id = chatWindowId;
+      div.style.cssText =
+        'padding: 5px; border: none; position: fixed; flex-direction: column; justify-content: space-between; box-shadow: rgba(150, 150, 150, 0.2) 0px 10px 30px 0px, rgba(150, 150, 150, 0.2) 0px 0px 0px 1px; bottom: 80px; right: 60px; width: 60%; height: 667px; max-width: 90vw; max-height: 90vh; display: flex; z-index: 2147483647; overflow: hidden; left: unset; background-color: transparent; user-select: none; -webkit-user-select: none;';
+      div.style.visibility = defaultOpen ? 'unset' : 'hidden';
+
+      div.innerHTML = htmlContent;
+      document.body.appendChild(div);
+
+      const chatoverlay = document.createElement('div');
+      chatoverlay.style.cssText =
+        'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; display: none; z-index: 10;';
+      div.appendChild(chatoverlay);
+
+      div.addEventListener('mousemove', (e) => {
+        const rect = div.getBoundingClientRect();
+        const edgeSize = 5;
+        const isLeftEdge = Math.abs(rect.left - e.clientX) <= edgeSize;
+        const isTopEdge = Math.abs(rect.top - e.clientY) <= edgeSize;
+
+        div.style.cursor = isLeftEdge ? 'ew-resize' : isTopEdge ? 'ns-resize' : 'default';
+      });
+
+      // 添加鼠标按下事件
+      div.addEventListener('mousedown', (e) => {
+        const rect = div.getBoundingClientRect();
+        const edgeSize = 5;
+
+        if (Math.abs(rect.left - e.clientX) <= edgeSize) {
+          isResizing = true;
+          resizeDirection = 'left';
+          currentX = e.clientX;
+          initialWidth = rect.width;
+          initialLeft = rect.left;
+        } else if (Math.abs(rect.top - e.clientY) <= edgeSize) {
+          isResizing = true;
+          resizeDirection = 'top';
+          currentY = e.clientY;
+          initialHeight = rect.height;
+          initialTop = rect.top;
+        }
+
+        if (isResizing) {
+          chatoverlay.style.display = 'block';
+          globalOverlay.style.display = 'block';
+        }
+      });
+
+      // 添加鼠标移动事件
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        if (resizeDirection === 'left') {
+          const deltaX = e.clientX - currentX;
+          const newWidth = Math.min(Math.max(initialWidth - deltaX, 300), window.innerWidth * 0.9);
+          const newLeft = initialLeft + initialWidth - newWidth;
+          div.style.width = newWidth + 'px';
+          div.style.left = newLeft + 'px';
+        } else if (resizeDirection === 'top') {
+          const deltaY = e.clientY - currentY;
+          const newHeight = Math.min(
+            Math.max(initialHeight - deltaY, 300),
+            window.innerHeight * 0.85
+          );
+          const newTop = initialTop + initialHeight - newHeight;
+          div.style.height = newHeight + 'px';
+          div.style.top = newTop + 'px';
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          resizeDirection = '';
+          chatoverlay.style.display = 'none';
+          globalOverlay.style.display = 'none';
+        }
+      });
+    })
+    .catch((error) => {
+      console.error('Error loading content:', error);
+    });
+
+  // const iframe = document.createElement('iframe');
+  // iframe.allow = '*';
+  // iframe.referrerPolicy = 'no-referrer';
+  // iframe.title = 'FastGPT Chat Window';
+  // iframe.id = chatWindowId;
+  // iframe.src = botSrc;
+  // iframe.style.cssText =
+  //   'border: none; position: fixed; flex-direction: column; justify-content: space-between; box-shadow: rgba(150, 150, 150, 0.2) 0px 10px 30px 0px, rgba(150, 150, 150, 0.2) 0px 0px 0px 1px; bottom: 80px; right: 60px; width: 60%; height: 667px; max-width: 90vw; max-height: 85vh; border-radius: 0.75rem; display: flex; z-index: 2147483647; overflow: hidden; left: unset; background-color: #F3F4F6;';
+  // iframe.style.visibility = defaultOpen ? 'unset' : 'hidden';
+  // console.log('botSrc', botSrc);
+  // document.body.appendChild(iframe);
+
+  // document.addEventListener('click', function (event) {
+  //   const chatWindow = document.getElementById(chatWindowId);
+  //   if (!chatWindow) return;
+
+  //   if (
+  //     event.target === chatWindow ||
+  //     chatWindow?.contains(event.target) ||
+  //     event.target === ChatBtn ||
+  //     ChatBtn?.contains(event.target)
+  //   ) {
+  //     return;
+  //   }
+  //   // console.log('close');
+  //   const visibilityVal = chatWindow.style.visibility;
+  //   if (visibilityVal === 'unset') {
+  //     chatWindow.style.visibility = 'hidden';
+  //     ChatBtnDiv.src = MessageIcon;
+  //   }
+  // });
 
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
