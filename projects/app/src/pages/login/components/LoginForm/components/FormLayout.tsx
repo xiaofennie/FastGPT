@@ -161,25 +161,27 @@ const FormLayout = ({ children, setPageType, pageType }: Props) => {
 
   return (
     <Flex flexDirection={'column'} h={'100%'}>
-      <Flex alignItems={'center'} justify={'space-between'}>
-        <Flex alignItems={'center'}>
-          <Flex
-            w={['42px', '56px']}
-            h={['42px', '56px']}
-            bg={'myGray.25'}
-            borderRadius={['semilg', 'lg']}
-            borderWidth={['1px', '1.5px']}
-            borderColor={'myGray.200'}
-            alignItems={'center'}
-            justifyContent={'center'}
-          >
-            <MyImage src={LOGO_ICON} w={['22.5px', '36px']} alt={'icon'} />
-          </Flex>
-          <Box ml={[3, 5]} fontSize={['lg', 'xl']} fontWeight={'bold'} color={'myGray.900'}>
-            {feConfigs?.systemTitle}
-          </Box>
+      <Flex alignItems={'center'} justify={'center'} flexDirection={'column'}>
+        <Flex
+          w={['60px', '80px']}
+          h={['60px', '80px']}
+          bg={'myGray.25'}
+          borderRadius={['semilg', 'lg']}
+          borderWidth={['1px', '1.5px']}
+          borderColor={'myGray.200'}
+          alignItems={'center'}
+          justifyContent={'center'}
+        >
+          <MyImage src={'/icon/main-icon.png'} alt={'icon'} />
         </Flex>
-        {!isPc && <I18nLngSelector />}
+        <Box mt={[2, 2]} fontSize={['lg', 'xl']} fontWeight={'bold'} color={'myGray.900'}>
+          {feConfigs?.systemTitle}
+        </Box>
+        {!isPc && (
+          <Box mt={3}>
+            <I18nLngSelector />
+          </Box>
+        )}
       </Flex>
       {children}
       {show_oauth && (

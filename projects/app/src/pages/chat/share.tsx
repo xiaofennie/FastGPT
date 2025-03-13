@@ -38,6 +38,8 @@ import { ChatSourceEnum } from '@fastgpt/global/core/chat/constants';
 import { useI18nLng } from '@fastgpt/web/hooks/useI18n';
 import { AppSchema } from '@fastgpt/global/core/app/type';
 
+import { jwtCassWechat } from '@/service/common/system/index';
+
 const CustomPluginRunBox = dynamic(() => import('./components/CustomPluginRunBox'));
 
 type Props = {
@@ -50,12 +52,15 @@ type Props = {
   customUid: string;
   showRawSource: boolean;
   showNodeStatus: boolean;
+  cassWebUserSub: string;
+  cassWechatUser: string;
+  cassAppUser: string;
 };
 
 const OutLink = (props: Props) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { showRawSource, showNodeStatus } = props;
+  const { showRawSource, showNodeStatus, cassWebUserSub, cassWechatUser, cassAppUser } = props;
   const {
     shareId = '',
     showHistory = '1',
@@ -153,12 +158,36 @@ const OutLink = (props: Props) => {
         '*'
       );
 
+      // cassUserType: "USERID", "USERNUMBER"
+      // cassUserOrigin: 'WEB', 'WECHAT', 'APP'
+
+      let cassUserType,
+        cassUserOrigin,
+        cassUserId = '';
+
+      if (cassWebUserSub) {
+        cassUserType = 'USER_LOGIN_ID';
+        cassUserOrigin = 'WEB';
+        cassUserId = cassWebUserSub;
+      } else if (cassWechatUser) {
+        cassUserType = 'USER_NUMBER';
+        cassUserOrigin = 'WECHAT';
+        cassUserId = cassWechatUser;
+      } else if (cassAppUser) {
+        cassUserType = 'USER_LOGIN_ID';
+        cassUserOrigin = 'APP';
+        cassUserId = cassAppUser;
+      }
+
       const { responseText, responseData } = await streamFetch({
         data: {
           messages: histories,
           variables: {
             ...variables,
-            ...customVariables
+            ...customVariables,
+            cassUserType,
+            cassUserOrigin,
+            cassUserId
           },
           responseChatItemId,
           chatId: completionChatId,
@@ -203,7 +232,10 @@ const OutLink = (props: Props) => {
       onUpdateHistoryTitle,
       setChatBoxData,
       forbidLoadChat,
-      onChangeChatId
+      onChangeChatId,
+      cassWebUserSub,
+      cassWechatUser,
+      cassAppUser
     ]
   );
 
@@ -358,6 +390,12 @@ export async function getServerSideProps(context: any) {
   const authToken = context?.query?.authToken || '';
   const customUid = context?.query?.customUid || '';
 
+  const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
+  const cassWechatCode = context?.query?.code || '';
+
+  const cookies = context.req.cookies;
+  const cassAppUser = cookies.jwt || '';
+
   const app = await (async () => {
     try {
       await connectToDatabase();
@@ -375,6 +413,11 @@ export async function getServerSideProps(context: any) {
     }
   })();
 
+  let cassWechatToken = '';
+  if (cassWechatCode) {
+    cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
+  }
+
   return {
     props: {
       appId: String(app?.appId) ?? '',
@@ -385,6 +428,9 @@ export async function getServerSideProps(context: any) {
       showNodeStatus: app?.showNodeStatus ?? false,
       shareId: shareId ?? '',
       authToken: authToken ?? '',
+      cassWebUserSub: cassWebAuthToken ?? '',
+      cassWechatUser: cassWechatToken ?? '',
+      cassAppUser: cassAppUser ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }

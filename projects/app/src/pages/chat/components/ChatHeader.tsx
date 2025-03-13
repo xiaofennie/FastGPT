@@ -70,8 +70,8 @@ const ChatHeader = ({
         />
       )}
 
-      {/* control */}
-      {!isPlugin && <ToolMenu history={history} onRouteToAppDetail={onRouteToAppDetail} />}
+      {/* Markdown导出 */}
+      {/* {!isPlugin && <ToolMenu history={history} onRouteToAppDetail={onRouteToAppDetail} />} */}
     </Flex>
   );
 };

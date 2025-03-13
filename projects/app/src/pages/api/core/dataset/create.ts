@@ -63,7 +63,7 @@ async function handler(
   }
 
   // check limit
-  await checkTeamDatasetLimit(teamId);
+  // await checkTeamDatasetLimit(teamId);
 
   const datasetId = await mongoSessionRun(async (session) => {
     const [{ _id }] = await MongoDataset.create(
