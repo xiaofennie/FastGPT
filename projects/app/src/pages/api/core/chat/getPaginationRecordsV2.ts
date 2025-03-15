@@ -67,8 +67,8 @@ async function handler(
     appId,
     chatId,
     field: fieldMap[type],
-    offset,
-    limit: pageSize
+    offset: Number(offset),
+    limit: Number(pageSize)
   });
 
   // Remove important information

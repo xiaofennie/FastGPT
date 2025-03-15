@@ -9,8 +9,8 @@ import ChatBox from '@/components/core/chat/ChatContainer/ChatBox/indexV2';
 import type { StartChatFnProps } from '@/components/core/chat/ChatContainer/type';
 
 import PageContainer from '@/components/PageContainer';
-import ChatHeader from './components/ChatHeaderV2';
-import ChatHistorySlider from './components/ChatHistorySliderV2';
+import ChatHeader from '@/pageComponents/chat/ChatHeaderV2';
+import ChatHistorySlider from '@/pageComponents/chat/ChatHistorySliderV2';
 import { serviceSideProps } from '@fastgpt/web/common/system/nextjs';
 import { useTranslation } from 'next-i18next';
 import { getInitOutLinkChatInfo } from '@/web/core/chat/api';
@@ -40,7 +40,7 @@ import { AppSchema } from '@fastgpt/global/core/app/type';
 
 import { AppTypeEnum } from '@fastgpt/global/core/app/constants';
 
-const CustomPluginRunBox = dynamic(() => import('./components/CustomPluginRunBox'));
+const CustomPluginRunBox = dynamic(() => import('@/pageComponents/chat/CustomPluginRunBox'));
 
 type Props = {
   appName: string;
@@ -232,11 +232,11 @@ const Render = (props: Props) => {
 
   return source === ChatSourceEnum.share ? (
     <ChatContextProvider params={chatHistoryProviderParams}>
-      <ChatItemContextProvider>
-        <ChatRecordContextProvider params={chatRecordProviderParams}>
-          <OutLink {...props} />
-        </ChatRecordContextProvider>
-      </ChatItemContextProvider>
+      {/* <ChatItemContextProvider> */}
+      <ChatRecordContextProvider params={chatRecordProviderParams}>
+        <OutLink {...props} />
+      </ChatRecordContextProvider>
+      {/* </ChatItemContextProvider> */}
     </ChatContextProvider>
   ) : (
     <NextHead title={props.appName} desc={props.appIntro} icon={props.appAvatar} />

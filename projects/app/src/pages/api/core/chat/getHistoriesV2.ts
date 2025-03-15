@@ -22,8 +22,8 @@ async function handler(
   const [data, total] = await Promise.all([
     await MongoChat.find({ appId }, 'chatId title top customTitle appId updateTime')
       .sort({ top: -1, updateTime: -1 })
-      .skip(offset)
-      .limit(pageSize),
+      .skip(Number(offset))
+      .limit(Number(pageSize)),
     MongoChat.countDocuments({ appId })
   ]);
 

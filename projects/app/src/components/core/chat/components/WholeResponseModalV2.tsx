@@ -242,11 +242,11 @@ export const WholeResponseContent = ({
           label={t('common:core.chat.response.Extension model')}
           value={activeModule?.extensionModel}
         />
-        <Row
+        {/* <Row
           label={t('common:support.wallet.usage.Extension result')}
           value={`${activeModule?.extensionResult}`}
-        />
-        {activeModule.quoteList && activeModule.quoteList.length > 0 && (
+        /> */}
+        {/* {activeModule.quoteList && activeModule.quoteList.length > 0 && (
           <Row
             label={t('common:core.chat.response.module quoteList')}
             rawDom={
@@ -258,7 +258,7 @@ export const WholeResponseContent = ({
               />
             }
           />
-        )}
+        )} */}
       </>
       {/* dataset concat */}
       <>

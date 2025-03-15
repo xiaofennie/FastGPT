@@ -247,7 +247,7 @@ const ResponseTags = ({
         </Flex>
       )}
 
-      {!!quoteModalData && (
+      {/* {!!quoteModalData && (
         <QuoteModal
           {...quoteModalData}
           chatItemId={historyItem.dataId}
@@ -255,7 +255,7 @@ const ResponseTags = ({
           showRawSource={showRawSource}
           onClose={() => setQuoteModalData(undefined)}
         />
-      )}
+      )} */}
       {isOpenContextModal && <ContextModal dataId={dataId} onClose={onCloseContextModal} />}
       {isOpenWholeModal && <WholeResponseModal dataId={dataId} onClose={onCloseWholeModal} />}
     </>

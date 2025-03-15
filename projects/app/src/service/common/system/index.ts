@@ -222,9 +222,9 @@ export function jwtCassWechat(appId: string | undefined, code: String) {
     const db = connectionMongo.connection.db;
 
     // 获取集合
-    const collection = db.collection('casscorpsecret');
+    const collection = db?.collection('casscorpsecret');
 
-    const result = await collection.findOne({ appId });
+    const result = await collection?.findOne({ appId });
 
     if (!result) {
       addLog.error('jwtCassWechat error: casscorpsecret找不到appId', appId);
