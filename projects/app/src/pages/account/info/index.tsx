@@ -41,7 +41,7 @@ import { getWebReqUrl } from '@fastgpt/web/common/system/utils';
 import AccountContainer from '@/pageComponents/account/AccountContainer';
 import { serviceSideProps } from '@fastgpt/web/common/system/nextjs';
 import { useRouter } from 'next/router';
-import TeamSelector from '@/pageComponents/account/TeamSelector';
+import TeamSelector from '@/components/Select/TeamSelector';
 import { getWorkorderURL } from '@/web/common/workorder/api';
 import { useRequest2 } from '@fastgpt/web/hooks/useRequest';
 
@@ -73,9 +73,7 @@ const Info = () => {
           <Flex justifyContent={'center'} maxW={'1080px'}>
             <Box flex={'0 0 330px'}>
               <MyInfo onOpenContact={onOpenContact} />
-              <Box mt={9}>
-                <Other onOpenContact={onOpenContact} />
-              </Box>
+              <Box mt={9}>{/* <Other onOpenContact={onOpenContact} /> */}</Box>
             </Box>
             {!!standardPlan && (
               <Box ml={'45px'} flex={'1'} maxW={'600px'}>
@@ -87,7 +85,7 @@ const Info = () => {
           <>
             <MyInfo onOpenContact={onOpenContact} />
             {standardPlan && <PlanUsage />}
-            <Other onOpenContact={onOpenContact} />
+            {/* <Other onOpenContact={onOpenContact} /> */}
           </>
         )}
       </Box>
@@ -270,14 +268,13 @@ const MyInfo = ({ onOpenContact }: { onOpenContact: () => void }) => {
             </Button>
           </Flex>
         )}
-        {feConfigs.isPlus && (
-          <Flex mt={6} alignItems={'center'}>
-            <Box {...labelStyles}>{t('account_info:user_team_team_name')}:&nbsp;</Box>
-            <Flex flex={'1 0 0'} w={0} align={'center'}>
-              <TeamSelector height={'28px'} w={'100%'} showManage onChange={initUserInfo} />
-            </Flex>
-          </Flex>
-        )}
+        <Flex mt={6} alignItems={'center'}>
+          <Box {...labelStyles}>{t('common:user.Team')}:&nbsp;</Box>
+          <Box flex={1}>
+            {/* <TeamSelector height={'28px'} w={'100%'} showManage onChange={initUserInfo} /> */}
+            <TeamSelector />
+          </Box>
+        </Flex>
         {feConfigs?.isPlus && (userInfo?.team?.balance ?? 0) > 0 && (
           <Box mt={6} whiteSpace={'nowrap'}>
             <Flex alignItems={'center'}>

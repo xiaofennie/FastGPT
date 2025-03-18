@@ -72,17 +72,17 @@ export const createCollectionAndInsertData = async ({
   });
 
   // 2. auth limit
-  await checkDatasetLimit({
-    teamId,
-    insertLen: predictDataLimitLength(
-      getTrainingModeByCollection({
-        trainingType,
-        autoIndexes: createCollectionParams.autoIndexes,
-        imageIndex: createCollectionParams.imageIndex
-      }),
-      chunks
-    )
-  });
+  // await checkDatasetLimit({
+  //   teamId,
+  //   insertLen: predictDataLimitLength(
+  //     getTrainingModeByCollection({
+  //       trainingType,
+  //       autoIndexes: createCollectionParams.autoIndexes,
+  //       imageIndex: createCollectionParams.imageIndex
+  //     }),
+  //     chunks
+  //   )
+  // });
 
   const fn = async (session: ClientSession) => {
     // 3. create collection
