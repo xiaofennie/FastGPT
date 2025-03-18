@@ -16,7 +16,7 @@ const TeamSelector = () => {
 
   useEffect(() => {
     if (!userInfo?._id) return;
-    getTeamList(userInfo?._id)
+    getTeamList('active')
       .then((list) => {
         console.log(userInfo);
         setTeamList(list);

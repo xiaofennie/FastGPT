@@ -41,7 +41,7 @@ import { getWebReqUrl } from '@fastgpt/web/common/system/utils';
 import AccountContainer from '@/pageComponents/account/AccountContainer';
 import { serviceSideProps } from '@fastgpt/web/common/system/nextjs';
 import { useRouter } from 'next/router';
-import TeamSelector from '@/pageComponents/account/TeamSelector';
+import TeamSelector from '@/components/Select/TeamSelector';
 import { getWorkorderURL } from '@/web/common/workorder/api';
 import { useRequest2 } from '@fastgpt/web/hooks/useRequest';
 
