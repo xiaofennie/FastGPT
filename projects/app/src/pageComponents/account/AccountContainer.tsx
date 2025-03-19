@@ -72,11 +72,11 @@ const AccountContainer = ({
           }
         ]
       : []),
-    {
-      icon: 'common/thirdParty',
-      label: t('account:third_party'),
-      value: TabEnum.thirdParty
-    },
+    // {
+    //   icon: 'common/thirdParty',
+    //   label: t('account:third_party'),
+    //   value: TabEnum.thirdParty
+    // },
     {
       icon: 'common/model',
       label: t('account:model_provider'),
@@ -161,10 +161,10 @@ const AccountContainer = ({
               onChange={setCurrentTab}
             />
             <Flex alignItems={'center'}>
-              <Box w={'8px'} h={'8px'} borderRadius={'50%'} bg={'#67c13b'} />
+              {/* <Box w={'8px'} h={'8px'} borderRadius={'50%'} bg={'#67c13b'} />
               <Box fontSize={'md'} ml={2}>
                 V{systemVersion}
-              </Box>
+              </Box> */}
             </Flex>
           </Flex>
         ) : (

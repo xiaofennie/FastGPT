@@ -184,7 +184,7 @@ const MyApps = () => {
 
             {isPc && RenderSearchInput}
 
-            {isPc && (
+            {/* {isPc && (
               <Flex
                 alignItems={'center'}
                 gap={1.5}
@@ -209,7 +209,7 @@ const MyApps = () => {
                 <MyImage src={'/imgs/app/templateFill.svg'} w={'18px'} />
                 {t('app:template_market')}
               </Flex>
-            )}
+            )} */}
 
             {(folderDetail
               ? folderDetail.permission.hasWritePer && folderDetail?.type !== AppTypeEnum.httpPlugin
