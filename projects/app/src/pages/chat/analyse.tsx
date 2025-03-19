@@ -232,11 +232,16 @@ const Render = (props: Props) => {
 
   return source === ChatSourceEnum.share ? (
     <ChatContextProvider params={chatHistoryProviderParams}>
-      {/* <ChatItemContextProvider> */}
-      <ChatRecordContextProvider params={chatRecordProviderParams}>
-        <OutLink {...props} />
-      </ChatRecordContextProvider>
-      {/* </ChatItemContextProvider> */}
+      <ChatItemContextProvider
+        showRouteToAppDetail={false}
+        showRouteToDatasetDetail={false}
+        isShowReadRawSource={false}
+        showNodeStatus={false}
+      >
+        <ChatRecordContextProvider params={chatRecordProviderParams}>
+          <OutLink {...props} />
+        </ChatRecordContextProvider>
+      </ChatItemContextProvider>
     </ChatContextProvider>
   ) : (
     <NextHead title={props.appName} desc={props.appIntro} icon={props.appAvatar} />

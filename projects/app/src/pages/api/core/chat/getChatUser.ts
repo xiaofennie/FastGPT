@@ -22,9 +22,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const variables = result?.variables || {};
   const userLoginId =
     variables.cassWebUserSub ||
-    (variables.cassUserOrigin == 'USER_LOGIN_ID' && variables.cassUserId);
+    (variables.cassUserOrigin == 'USER_LOGIN_ID' && variables.cassUserId) ||
+    (variables.cassUserType == 'USER_LOGIN_ID' && variables.cassUserId);
   const userNumber =
-    variables.cassWechatUser || (variables.cassUserOrigin == 'USER_NUMBER' && variables.cassUserId);
+    variables.cassWechatUser ||
+    (variables.cassUserOrigin == 'USER_NUMBER' && variables.cassUserId) ||
+    (variables.cassUserType == 'USER_NUMBER' && variables.cassUserId);
 
   if (userLoginId) {
     const userRes = await axios.post(
