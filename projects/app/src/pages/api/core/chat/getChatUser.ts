@@ -28,6 +28,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     variables.cassWechatUser ||
     (variables.cassUserOrigin == 'USER_NUMBER' && variables.cassUserId) ||
     (variables.cassUserType == 'USER_NUMBER' && variables.cassUserId);
+  console.log(userLoginId, userNumber);
 
   if (userLoginId) {
     const userRes = await axios.post(
@@ -37,7 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         detail: false,
         messages: [
           {
-            content: variables.cassWebUserSub,
+            content: userLoginId,
             role: 'user'
           }
         ]
@@ -60,7 +61,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         detail: false,
         messages: [
           {
-            content: variables.cassWechatUser,
+            content: userNumber,
             role: 'user'
           }
         ]
