@@ -1,5 +1,5 @@
 # --------- install dependence -----------
-  FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS maindeps
+  FROM registry.cn-shenzhen.aliyuncs.com/starsl/node:20.14.0-alpine AS maindeps
   WORKDIR /app
   
   ARG proxy
@@ -48,7 +48,7 @@
   RUN pnpm i --registry=https://registry.npmmirror.com
   
   # --------- builder -----------
-  FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS builder
+  FROM registry.cn-shenzhen.aliyuncs.com/starsl/node:20.14.0-alpine AS builder
   WORKDIR /app
   
   ARG proxy
@@ -99,7 +99,7 @@
   RUN pnpm --filter=app build
   
   # --------- runner -----------
-  FROM registry.us-east-1.aliyuncs.com/oll/node:20.14.0-alpine AS runner
+  FROM registry.cn-shenzhen.aliyuncs.com/starsl/node:20.14.0-alpine AS runner
   WORKDIR /app
   
   ARG proxy

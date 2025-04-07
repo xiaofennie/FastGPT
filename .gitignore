@@ -48,4 +48,9 @@ files/docker/mysql
 files/docker/oneapi
 files/docker/pg
 
+deploy/docker/mongo
+deploy/docker/mysql
+deploy/docker/oneapi
+deploy/docker/pg
+
 tmp/
