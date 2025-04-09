@@ -238,13 +238,13 @@ export function jwtCassWechat(appId: string | undefined, code: String) {
 
     const accessToken = accessTokenRes?.data?.access_token;
 
-    // console.info('jwtCassWechat accessToken', accessToken);
+    console.info('jwtCassWechat1', accessToken, corpsecret);
 
     const userInfoRes = await axios.get(
       `https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo?access_token=${accessToken}&code=${code}`
     );
 
-    // console.info('jwtCassWechat userInfoRes', userInfoRes?.data);
+    console.info('jwtCassWechat2', code, userInfoRes?.data);
 
     const jwtSecret = process.env.USER_JWT_SECRET;
 
