@@ -1,5 +1,14 @@
 import React, { useMemo, useEffect } from 'react';
-import { Box, Button, Flex, useTheme, IconButton } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  useTheme,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement
+} from '@chakra-ui/react';
 import { useSystem } from '@fastgpt/web/hooks/useSystem';
 import { useEditTitle } from '@/web/common/hooks/useEditTitle';
 import { useRouter } from 'next/router';
@@ -43,6 +52,9 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
   const onDelHistory = useContextSelector(ChatContext, (v) => v.onDelHistory);
   const onClearHistory = useContextSelector(ChatContext, (v) => v.onClearHistories);
   const onUpdateHistory = useContextSelector(ChatContext, (v) => v.onUpdateHistory);
+  const searchKeyword = useContextSelector(ChatContext, (v) => v.searchKeyword);
+  const setSearchKeyword = useContextSelector(ChatContext, (v) => v.setSearchKeyword);
+  const loadHistories = useContextSelector(ChatContext, (v) => v.loadHistories);
 
   const appName = useContextSelector(ChatItemContext, (v) => v.chatBoxData?.app.name);
   const appAvatar = useContextSelector(ChatItemContext, (v) => v.chatBoxData?.app.avatar);
@@ -82,6 +94,14 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
     [appId, userInfo?.team.permission.hasWritePer]
   );
 
+  // 处理回车键触发搜索
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // @ts-ignore: loadHistories 实际上接受一个可选的布尔参数
+      loadHistories(true);
+    }
+  };
+
   return (
     <MyBox
       isLoading={isLoading}
@@ -117,6 +137,27 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
           </Flex>
         </MyTooltip>
       )}
+
+      {/* 搜索框 */}
+      <Box px={[2, 5]} my={3}>
+        <InputGroup size="md">
+          <InputLeftElement pointerEvents="none">
+            <MyIcon name="common/searchLight" w="15px" color="myGray.500" />
+          </InputLeftElement>
+          <Input
+            placeholder="搜索"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={handleKeyDown}
+            borderRadius="md"
+            bg="myGray.50"
+            _focus={{
+              bg: 'white',
+              borderColor: 'primary.300'
+            }}
+          />
+        </InputGroup>
+      </Box>
 
       {/* menu */}
       {/* <Flex

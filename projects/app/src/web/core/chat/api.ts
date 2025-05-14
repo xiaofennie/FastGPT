@@ -47,8 +47,9 @@ export const getTeamChatInfo = (data: InitTeamChatProps) =>
 export const getChatHistories = (data: PaginationProps<GetHistoriesProps>) =>
   POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistories', data);
 
-export const getChatHistoriesV2 = (data: PaginationProps<GetHistoriesProps>) =>
-  POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistoriesV2', data);
+export const getChatHistoriesV2 = (
+  data: PaginationProps<GetHistoriesProps & { keyword?: string }>
+) => POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistoriesV2', data);
 
 export const getChatUser = (appId: string, chatId: string) =>
   GET<any>(`/core/chat/getChatUser`, { appId, chatId });
@@ -112,3 +113,10 @@ export const getMyTokensApps = (data: AuthTeamTagTokenProps) =>
  */
 export const getinitTeamChat = (data: { teamId: string; authToken: string; appId: string }) =>
   GET(`/proApi/core/chat/initTeamChat`, data);
+
+/**
+ * 搜索聊天历史记录
+ */
+export const searchChatHistories = (
+  data: PaginationProps<GetHistoriesProps & { keyword: string }>
+) => POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/searchHistories', data);

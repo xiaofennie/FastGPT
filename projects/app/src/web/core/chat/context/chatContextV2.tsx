@@ -1,6 +1,6 @@
 import { useRequest2 } from '@fastgpt/web/hooks/useRequest';
 import { useRouter } from 'next/router';
-import React, { ReactNode, useCallback, useMemo, useRef } from 'react';
+import React, { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { createContext } from 'use-context-selector';
 import {
   delClearChatHistories,
@@ -35,6 +35,8 @@ type ChatContextType = {
   forbidLoadChat: React.MutableRefObject<boolean>;
   onChangeChatId: (chatId?: string, forbid?: boolean) => void;
   loadHistories: () => void;
+  searchKeyword: string;
+  setSearchKeyword: React.Dispatch<React.SetStateAction<string>>;
   ScrollData: ({
     children,
     EmptyChildren,
@@ -65,6 +67,10 @@ export const ChatContext = createContext<ChatContextType>({
     throw new Error('Function not implemented.');
   },
   loadHistories: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  searchKeyword: '',
+  setSearchKeyword: function (): void {
     throw new Error('Function not implemented.');
   },
   setHistories: function (): void {
@@ -104,6 +110,7 @@ const ChatContextProvider = ({
 
   const forbidLoadChat = useRef(false);
   const { chatId, appId, setChatId, outLinkAuthData } = useChatStore();
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   const { isOpen: isOpenSlider, onClose: onCloseSlider, onOpen: onOpenSlider } = useDisclosure();
 
@@ -115,7 +122,10 @@ const ChatContextProvider = ({
     data: histories
   } = useScrollPagination(getChatHistoriesV2, {
     pageSize: 20,
-    params,
+    params: {
+      ...params,
+      ...(searchKeyword ? { keyword: searchKeyword } : {})
+    },
     refreshDeps: [params],
     showErrorToast: false
   });
@@ -242,6 +252,8 @@ const ChatContextProvider = ({
       setHistories,
       ScrollData,
       loadHistories,
+      searchKeyword,
+      setSearchKeyword,
       histories,
       onUpdateHistoryTitle
     }),
@@ -251,6 +263,7 @@ const ChatContextProvider = ({
       isLoading,
       isOpenSlider,
       loadHistories,
+      searchKeyword,
       onChangeAppId,
       onChangeChatId,
       onClearHistories,

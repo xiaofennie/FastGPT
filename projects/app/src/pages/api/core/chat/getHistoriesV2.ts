@@ -9,7 +9,7 @@ import { PaginationProps, PaginationResponse } from '@fastgpt/web/common/fetch/t
 import { GetHistoriesProps } from '@/global/core/chat/api';
 export type getHistoriesQuery = {};
 
-export type getHistoriesBody = PaginationProps<GetHistoriesProps>;
+export type getHistoriesBody = PaginationProps<GetHistoriesProps> & { keyword?: string };
 
 export type getHistoriesResponse = {};
 
@@ -17,14 +17,22 @@ async function handler(
   req: ApiRequestProps<getHistoriesBody, getHistoriesQuery>,
   res: ApiResponseType<any>
 ): Promise<PaginationResponse<getHistoriesResponse>> {
-  const { appId, offset, pageSize } = req.body as getHistoriesBody;
+  const { appId, offset, pageSize, keyword } = req.body as getHistoriesBody;
+
+  // 构建查询条件
+  const queryCondition: any = { appId };
+
+  // 只有当keyword有值时才添加搜索条件
+  if (keyword) {
+    queryCondition.$or = [{ title: { $regex: keyword, $options: 'i' } }];
+  }
 
   const [data, total] = await Promise.all([
-    await MongoChat.find({ appId }, 'chatId title top customTitle appId updateTime')
+    await MongoChat.find(queryCondition, 'chatId title top customTitle appId updateTime')
       .sort({ top: -1, updateTime: -1 })
       .skip(Number(offset))
       .limit(Number(pageSize)),
-    MongoChat.countDocuments({ appId })
+    MongoChat.countDocuments(queryCondition)
   ]);
 
   return {
