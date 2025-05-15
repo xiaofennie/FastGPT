@@ -1,11 +1,10 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import {
   Box,
   Button,
   Flex,
   useTheme,
   IconButton,
-  Input,
   InputGroup,
   InputLeftElement
 } from '@chakra-ui/react';
@@ -25,6 +24,9 @@ import MyBox from '@fastgpt/web/components/common/MyBox';
 import { formatTimeToChatTime } from '@fastgpt/global/common/string/time';
 import { ChatItemContext } from '@/web/core/chat/context/chatItemContext';
 import { useChatStore } from '@/web/core/chat/context/useChatStore';
+import SearchInput from '@fastgpt/web/components/common/Input/SearchInput';
+import { getChatUserId } from '@/web/core/chat/api';
+import { useRequest2 } from '@fastgpt/web/hooks/useRequest';
 
 type HistoryItemType = {
   id: string;
@@ -52,7 +54,7 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
   const onDelHistory = useContextSelector(ChatContext, (v) => v.onDelHistory);
   const onClearHistory = useContextSelector(ChatContext, (v) => v.onClearHistories);
   const onUpdateHistory = useContextSelector(ChatContext, (v) => v.onUpdateHistory);
-  const searchKeyword = useContextSelector(ChatContext, (v) => v.searchKeyword);
+  // const searchKeyword = useContextSelector(ChatContext, (v) => v.searchKeyword);
   const setSearchKeyword = useContextSelector(ChatContext, (v) => v.setSearchKeyword);
   const loadHistories = useContextSelector(ChatContext, (v) => v.loadHistories);
 
@@ -94,12 +96,91 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
     [appId, userInfo?.team.permission.hasWritePer]
   );
 
+  const [searchParams, setSearchParams] = useState('');
+
+  // 添加远程搜索结果状态
+  const [remoteSearchResults, setRemoteSearchResults] = useState<
+    Array<{
+      label: string;
+      value: string;
+    }>
+  >([]);
+
+  // 添加选中用户状态
+  const [selectedUser, setSelectedUser] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
+
+  // 使用useRequest2处理API调用
+  const { loading: isSearching } = useRequest2(
+    () => {
+      if (!searchParams) {
+        setRemoteSearchResults([]);
+        return Promise.resolve([]);
+      }
+
+      // 如果已经选中用户，不再发起远程搜索
+      if (selectedUser) {
+        return Promise.resolve([]);
+      }
+
+      // 如果是刚刚清除了选择，也不要搜索
+      if (searchParams === '') {
+        return Promise.resolve([]);
+      }
+
+      return getChatUserId(searchParams);
+    },
+    {
+      manual: false,
+      throttleWait: 800,
+      refreshDeps: [searchParams, selectedUser],
+      onSuccess: (data) => {
+        // 如果已选中用户，不更新搜索结果
+        if (selectedUser) return;
+        if (!data.cass_staff || !data.cass_user) return;
+
+        const userInfoArr = [
+          ...data.cass_staff.map((item: any) => ({
+            value: item.qywxuserid,
+            label: item.username + '(' + item.deptname + ')'
+          })),
+          ...data.cass_user.map((item: any) => ({
+            value: item.user_login_id,
+            label: item.username + '(' + item.company_display_name + ')'
+          }))
+        ];
+        setRemoteSearchResults(userInfoArr);
+      }
+    }
+  );
+
   // 处理回车键触发搜索
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       // @ts-ignore: loadHistories 实际上接受一个可选的布尔参数
       loadHistories(true);
     }
+  };
+
+  // 处理用户选择
+  const handleUserSelect = (user: { label: string; value: string }) => {
+    setSelectedUser(user);
+    // setSearchParams(user.value); // 将搜索关键字设为用户ID
+    setRemoteSearchResults([]); // 清空搜索结果
+    setSearchKeyword(user.value);
+
+    // 加载该用户的聊天历史
+    // @ts-ignore: loadHistories 实际上接受一个可选的布尔参数
+    // loadHistories(true);
+  };
+
+  // 清除选中的用户
+  const clearSelectedUser = () => {
+    setSelectedUser(null);
+    setSearchParams('');
+    setSearchKeyword('');
   };
 
   return (
@@ -139,24 +220,96 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
       )}
 
       {/* 搜索框 */}
-      <Box px={[2, 5]} my={3}>
-        <InputGroup size="md">
-          <InputLeftElement pointerEvents="none">
-            <MyIcon name="common/searchLight" w="15px" color="myGray.500" />
-          </InputLeftElement>
-          <Input
-            placeholder="搜索"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            onKeyDown={handleKeyDown}
-            borderRadius="md"
+      <Box px={[2, 5]} my={3} position="relative">
+        <SearchInput
+          placeholder="用户搜索"
+          value={searchParams}
+          onChange={(e) => {
+            setSearchParams(e.target.value);
+            // 当用户修改搜索框内容时，清除已选择的用户
+            if (selectedUser && e.target.value !== selectedUser.value) {
+              setSelectedUser(null);
+            }
+          }}
+          onKeyDown={handleKeyDown}
+          bgColor="myGray.50"
+        />
+
+        {/* 已选择用户的显示 */}
+        {selectedUser && (
+          <Flex
+            position="absolute"
+            left="0"
+            right="0"
+            top="0"
+            bottom="0"
+            alignItems="center"
+            px="12px"
             bg="myGray.50"
-            _focus={{
-              bg: 'white',
-              borderColor: 'primary.300'
-            }}
-          />
-        </InputGroup>
+            borderRadius="md"
+            mx={[2, 5]}
+            zIndex="5"
+          >
+            <Box flex="1" className="textEllipsis" fontSize={'sm'}>
+              {selectedUser.label}
+            </Box>
+            <IconButton
+              size="xs"
+              aria-label="清除选择"
+              icon={<MyIcon name="close" w="12px" />}
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                clearSelectedUser();
+              }}
+            />
+          </Flex>
+        )}
+
+        {/* 搜索下拉框 */}
+        {searchParams && !selectedUser && (
+          <Box
+            position="absolute"
+            top="100%"
+            left="0"
+            right="0"
+            zIndex="10"
+            bg="white"
+            borderRadius="md"
+            boxShadow="md"
+            maxH="300px"
+            overflowY="auto"
+            mt={1}
+            mx={[2, 5]}
+          >
+            {/* 远程搜索结果 */}
+            {remoteSearchResults.length > 0 && (
+              <>
+                {remoteSearchResults.map((item) => (
+                  <Flex
+                    key={`${item.value}`}
+                    alignItems="center"
+                    p={2}
+                    cursor="pointer"
+                    _hover={{ bg: 'myGray.50' }}
+                    onClick={() => handleUserSelect(item)}
+                  >
+                    <Box flex="1" ml={3} className="textEllipsis" fontSize={'sm'}>
+                      {item.label}
+                    </Box>
+                  </Flex>
+                ))}
+              </>
+            )}
+
+            {/* 加载中状态 */}
+            {isSearching && (
+              <Box p={3} textAlign="center" color="myGray.500">
+                搜索中...
+              </Box>
+            )}
+          </Box>
+        )}
       </Box>
 
       {/* menu */}

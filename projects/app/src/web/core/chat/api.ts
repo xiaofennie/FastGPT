@@ -53,6 +53,8 @@ export const getChatHistoriesV2 = (
 
 export const getChatUser = (appId: string, chatId: string) =>
   GET<any>(`/core/chat/getChatUser`, { appId, chatId });
+
+export const getChatUserId = (keyword: string) => GET<any>(`/core/chat/getChatUserId`, { keyword });
 /**
  * get detail responseData by dataId appId chatId
  */

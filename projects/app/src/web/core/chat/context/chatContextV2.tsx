@@ -126,7 +126,7 @@ const ChatContextProvider = ({
       ...params,
       ...(searchKeyword ? { keyword: searchKeyword } : {})
     },
-    refreshDeps: [params],
+    refreshDeps: [params, searchKeyword],
     showErrorToast: false
   });
 

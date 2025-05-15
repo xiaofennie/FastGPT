@@ -24,7 +24,10 @@ async function handler(
 
   // 只有当keyword有值时才添加搜索条件
   if (keyword) {
-    queryCondition.$or = [{ title: { $regex: keyword, $options: 'i' } }];
+    queryCondition.$or = [
+      // { title: { $regex: keyword, $options: 'i' } },
+      { 'variables.cassUserId': { $regex: keyword, $options: 'i' } }
+    ];
   }
 
   const [data, total] = await Promise.all([
