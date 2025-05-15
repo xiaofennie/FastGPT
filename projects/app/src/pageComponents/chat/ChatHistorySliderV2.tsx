@@ -142,13 +142,29 @@ const ChatHistorySlider = ({ confirmClearText }: { confirmClearText: string }) =
         if (!data.cass_staff || !data.cass_user) return;
 
         const userInfoArr = [
-          ...data.cass_staff.map((item: any) => ({
-            value: item.qywxuserid,
-            label: item.username + '(' + item.deptname + ')'
-          })),
-          ...data.cass_user.map((item: any) => ({
-            value: item.user_login_id,
-            label: item.username + '(' + item.company_display_name + ')'
+          ...Object.values(
+            [...data.cass_staff, ...data.cass_user].reduce((acc: any, item: any) => {
+              const value = item.qywxuserid || item.user_login_id;
+              const username = item.username;
+              const orgName = item.deptname || item.company_display_name;
+
+              if (!acc[value]) {
+                acc[value] = {
+                  value,
+                  username,
+                  orgs: [orgName]
+                };
+              } else {
+                if (!acc[value].orgs.includes(orgName)) {
+                  acc[value].orgs.push(orgName);
+                }
+              }
+
+              return acc;
+            }, {})
+          ).map((item: any) => ({
+            value: item.value,
+            label: `${item.username}(${item.orgs.join(',')})`
           }))
         ];
         setRemoteSearchResults(userInfoArr);

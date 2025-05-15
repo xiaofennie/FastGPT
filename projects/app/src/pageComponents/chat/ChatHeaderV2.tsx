@@ -55,9 +55,13 @@ const ChatHeader = ({
       if (appId && chatId) {
         const res = await getChatUser(appId, chatId);
         if (res.length) {
-          setUserInfo(
-            `${res[0].company_display_name || res[0].deptname}-${res[0].username}(${res[0].userno || res[0].user_login_name})`
-          );
+          let finalRes = '';
+          let finalName = '';
+          res.forEach((item: any) => {
+            finalRes += `${item.company_display_name || item.deptname}${res[res.length - 1] === item ? '' : ','}`;
+          });
+          finalName = `${res[0].username}-${res[0].userno || res[0].user_login_name}`;
+          setUserInfo(finalName + '(' + finalRes + ')');
         } else {
           setUserInfo('');
         }
@@ -83,9 +87,11 @@ const ChatHeader = ({
             chatModels={chatData.app.chatModels}
           />
           <Box flex={1} />
-          <Box px={2} color={'myGray.600'} fontSize={'sm'}>
-            {userInfo}
-          </Box>
+          <MyTooltip label={userInfo}>
+            <Box px={2} color={'myGray.600'} fontSize={'sm'} maxW="300px" className="textEllipsis">
+              {userInfo}
+            </Box>
+          </MyTooltip>
         </>
       ) : (
         <MobileHeader
