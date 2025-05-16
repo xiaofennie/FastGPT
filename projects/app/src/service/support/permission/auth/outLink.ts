@@ -58,7 +58,7 @@ export async function authOutLinkChatStart({
 
   // check ai points and chat limit
   const [{ timezone, externalProvider }, { uid }] = await Promise.all([
-    getUserChatInfoAndAuthTeamPoints(outLinkConfig.tmbId),
+    getUserChatInfoAndAuthTeamPoints(outLinkConfig.tmbId, outLinkConfig.teamId),
     authOutLinkChatLimit({ outLink: outLinkConfig, ip, outLinkUid, question })
   ]);
 

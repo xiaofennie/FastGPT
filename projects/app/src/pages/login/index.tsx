@@ -148,7 +148,7 @@ const Login = ({ ChineseRedirectUrl }: { ChineseRedirectUrl: string }) => {
       <Flex
         alignItems={'center'}
         justifyContent={'center'}
-        bg={`url(${getWebReqUrl('/icon/login-bg.svg')}) no-repeat`}
+        bg={`url(${getWebReqUrl('/icon/background.png')}) no-repeat`}
         backgroundSize={'cover'}
         userSelect={'none'}
         h={'100%'}
