@@ -46,14 +46,29 @@ export const getTeamChatInfo = (data: InitTeamChatProps) =>
  */
 export const getChatHistories = (data: PaginationProps<GetHistoriesProps>) =>
   POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistories', data);
+
+export const getChatHistoriesV2 = (
+  data: PaginationProps<GetHistoriesProps & { keyword?: string }>
+) => POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/getHistoriesV2', data);
+
+export const getChatUser = (appId: string, chatId: string) =>
+  GET<any>(`/core/chat/getChatUser`, { appId, chatId });
+
+export const getChatUserId = (keyword: string) => GET<any>(`/core/chat/getChatUserId`, { keyword });
 /**
  * get detail responseData by dataId appId chatId
  */
 export const getChatResData = (data: getResDataQuery) =>
   GET<ChatHistoryItemResType[]>(`/core/chat/getResData`, data);
 
+export const getChatResDataV2 = (data: getResDataQuery) =>
+  GET<ChatHistoryItemResType[]>(`/core/chat/getResDataV2`, data);
+
 export const getChatRecords = (data: getPaginationRecordsBody) =>
   POST<getPaginationRecordsResponse>('core/chat/getPaginationRecords', data);
+
+export const getChatRecordsV2 = (data: getPaginationRecordsBody) =>
+  POST<getPaginationRecordsResponse>('core/chat/getPaginationRecordsV2', data);
 
 /**
  * delete one history
@@ -106,3 +121,9 @@ export const getQuoteDataList = (data: GetQuoteDataProps) =>
 
 export const getCollectionQuote = (data: GetCollectionQuoteProps) =>
   POST<GetCollectionQuoteRes>(`/core/chat/quote/getCollectionQuote`, data);
+/**
+ * 搜索聊天历史记录
+ */
+export const searchChatHistories = (
+  data: PaginationProps<GetHistoriesProps & { keyword: string }>
+) => POST<PaginationResponse<ChatHistoryItemType>>('/core/chat/searchHistories', data);
