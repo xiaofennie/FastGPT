@@ -23,7 +23,7 @@ import { TeamInvoiceHeaderType } from '@fastgpt/global/support/user/team/type';
 import { PaginationProps, PaginationResponse } from '@fastgpt/web/common/fetch/type';
 
 /* --------------- team  ---------------- */
-export const getTeamList = (status: `${TeamMemberSchema['status']}`) =>
+export const getTeamList = (status: string) =>
   GET<TeamTmbItemType[]>(`/proApi/support/user/team/list`, { status });
 export const postCreateTeam = (data: CreateTeamProps) =>
   POST<string>(`/proApi/support/user/team/create`, data);

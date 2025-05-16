@@ -71,18 +71,18 @@ export const createCollectionAndInsertData = async ({
     isQAImport
   });
 
-  // 2. auth limit
-  await checkDatasetLimit({
-    teamId,
-    insertLen: predictDataLimitLength(
-      getTrainingModeByCollection({
-        trainingType,
-        autoIndexes: createCollectionParams.autoIndexes,
-        imageIndex: createCollectionParams.imageIndex
-      }),
-      chunks
-    )
-  });
+  // // 2. auth limit
+  // await checkDatasetLimit({
+  //   teamId,
+  //   insertLen: predictDataLimitLength(
+  //     getTrainingModeByCollection({
+  //       trainingType,
+  //       autoIndexes: createCollectionParams.autoIndexes,
+  //       imageIndex: createCollectionParams.imageIndex
+  //     }),
+  //     chunks
+  //   )
+  // });
 
   const fn = async (session: ClientSession) => {
     // 3. create collection

@@ -241,3 +241,10 @@ export async function updateTeam({
     }
   });
 }
+// 在 controller.ts 中添加
+export async function getTeamList(userId: string, status: string): Promise<any[]> {
+  return await MongoTeamMember.find({
+    userId: new Types.ObjectId(userId),
+    status
+  }).populate('teamId');
+}
