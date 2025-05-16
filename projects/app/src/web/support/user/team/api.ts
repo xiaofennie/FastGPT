@@ -26,7 +26,7 @@ import type {
 } from '@fastgpt/service/support/user/team/invitationLink/type';
 
 /* --------------- team  ---------------- */
-export const getTeamList = (status: `${TeamMemberSchema['status']}`) =>
+export const getTeamList = (status: string) =>
   GET<TeamTmbItemType[]>(`/proApi/support/user/team/list`, { status });
 export const postCreateTeam = (data: CreateTeamProps) =>
   POST<string>(`/proApi/support/user/team/create`, data);

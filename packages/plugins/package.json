@@ -6,6 +6,7 @@
     "cheerio": "1.0.0-rc.12",
     "@types/pg": "^8.6.6",
     "axios": "^1.8.2",
+    "canvas": "^2.11.2",
     "duck-duck-scrape": "^2.2.5",
     "echarts": "5.4.1",
     "expr-eval": "^2.0.2",
@@ -14,7 +15,10 @@
     "mysql2": "^3.11.3",
     "json5": "^2.2.3",
     "pg": "^8.10.0",
-    "wikijs": "^6.4.1"
+    "wikijs": "^6.4.1",
+    "doris2": "^1.0.7",
+    "vega": "^5.25.0",
+    "vega-lite": "^5.16.0"
   },
   "devDependencies": {
     "@fastgpt/global": "workspace:*",
