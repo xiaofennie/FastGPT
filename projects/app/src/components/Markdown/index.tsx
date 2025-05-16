@@ -10,7 +10,7 @@ import RehypeExternalLinks from 'rehype-external-links';
 import styles from './index.module.scss';
 import dynamic from 'next/dynamic';
 
-import { Box } from '@chakra-ui/react';
+import { Box, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import { CodeClassNameEnum, mdTextFormat } from './utils';
 
 const CodeLight = dynamic(() => import('./codeBlock/CodeLight'), { ssr: false });
@@ -47,7 +47,27 @@ const MarkdownRender = ({ source = '', showAnimation, isDisabled, forbidZhFormat
       img: Image,
       pre: RewritePre,
       code: Code,
-      a: A
+      a: A,
+      table: ({ children }: any) => (
+        <Box overflowX="auto" my={4}>
+          <Table variant="simple" size="sm">
+            {children}
+          </Table>
+        </Box>
+      ),
+      thead: Thead,
+      tbody: Tbody,
+      tr: Tr,
+      th: ({ children, isHeader }: any) => (
+        <Th textAlign="center" whiteSpace="nowrap" bg="gray.50">
+          {children}
+        </Th>
+      ),
+      td: ({ children }: any) => (
+        <Td textAlign="center" whiteSpace="nowrap">
+          {children}
+        </Td>
+      )
     }),
     []
   );

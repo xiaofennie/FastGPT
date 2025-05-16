@@ -292,7 +292,7 @@ const ChatInput = ({
         />
         <Flex alignItems={'center'} position={'absolute'} right={[2, 4]} bottom={['10px', '12px']}>
           {/* voice-input */}
-          {whisperConfig?.open && !inputValue && !isChatting && (
+          {/* {whisperConfig?.open && !inputValue && !isChatting && (
             <>
               <canvas
                 ref={canvasRef}
@@ -351,7 +351,7 @@ const ChatInput = ({
                 </Flex>
               </MyTooltip>
             </>
-          )}
+          )} */}
           {/* send and stop icon */}
           {isSpeaking ? (
             <Box color={'#5A646E'} w={'36px'} textAlign={'right'} whiteSpace={'nowrap'}>
