@@ -303,7 +303,7 @@ export const dispatchHttp468Request = async (props: HttpRequestProps): Promise<H
       // 检查变量是否在引号内
       const isInQuotes = isVariableInQuotes(text, fullMatch);
 
-      text = text.replace(new RegExp(`{{(${key})}}`, ''), () =>
+      text = text.replace(new RegExp(`{{(${key})}}`, 'g'), () =>
         valToStr(allVariables[key], isInQuotes)
       );
     }

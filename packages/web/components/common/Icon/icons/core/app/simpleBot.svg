@@ -12,8 +12,8 @@
     <defs>
         <linearGradient id="paint0_linear_5533_28322" x1="16" y1="0" x2="4.88889" y2="29.3333"
             gradientUnits="userSpaceOnUse">
-            <stop stop-color="#67BFFF" />
-            <stop offset="1" stop-color="#5BA6FF" />
+            <stop stop-color="#004D99" />
+            <stop offset="1" stop-color="#0088CC" />
         </linearGradient>
     </defs>
 </svg>

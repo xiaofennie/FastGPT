@@ -7,6 +7,7 @@
     "@types/pg": "^8.6.6",
     "@types/nodemailer": "^6.4.17",
     "axios": "^1.8.2",
+    "canvas": "^2.11.2",
     "duck-duck-scrape": "^2.2.5",
     "echarts": "5.4.1",
     "expr-eval": "^2.0.2",
@@ -16,7 +17,10 @@
     "json5": "^2.2.3",
     "nodemailer": "^6.10.0",
     "pg": "^8.10.0",
-    "wikijs": "^6.4.1"
+    "wikijs": "^6.4.1",
+    "doris2": "^1.0.7",
+    "vega": "^5.25.0",
+    "vega-lite": "^5.16.0"
   },
   "devDependencies": {
     "@fastgpt/global": "workspace:*",

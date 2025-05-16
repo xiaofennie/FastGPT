@@ -42,6 +42,8 @@ export type FastGPTConfigFileType = {
 
 export type FastGPTFeConfigsType = {
   show_workorder?: boolean;
+  emptyText?: string;
+
   show_emptyChat?: boolean;
   isPlus?: boolean;
   register_method?: ['email' | 'phone' | 'sync'];
