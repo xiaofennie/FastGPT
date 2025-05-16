@@ -76,7 +76,7 @@ const ChatHeader = ({
         {!isVariableVisible && <VariablePopover showExternalVariables={isChat} />}
 
         {/* control */}
-        {!isPlugin && <ToolMenu history={history} />}
+        {/* {!isPlugin && <ToolMenu history={history} />} */}
       </Flex>
     </Flex>
   );

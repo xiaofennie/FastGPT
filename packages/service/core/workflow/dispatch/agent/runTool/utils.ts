@@ -14,7 +14,7 @@ export const updateToolInputValue = ({
 }) => {
   return inputs.map((input) => ({
     ...input,
-    value: params[input.key] ?? input.value
+    value: params[input.key]
   }));
 };
 

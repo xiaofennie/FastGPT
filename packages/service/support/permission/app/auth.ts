@@ -15,6 +15,8 @@ import { PluginSourceEnum } from '@fastgpt/global/core/plugin/constants';
 import { type AuthModeType, type AuthResponseType } from '../type';
 import { AppDefaultPermissionVal } from '@fastgpt/global/support/permission/app/constant';
 
+import { addLog } from '../../../common/system/log';
+
 export const authPluginByTmbId = async ({
   tmbId,
   appId,
@@ -51,7 +53,17 @@ export const authAppByTmbId = async ({
 }): Promise<{
   app: AppDetailType;
 }> => {
-  const { teamId, permission: tmbPer } = await getTmbInfoByTmbId({ tmbId });
+  // const { teamId, permission: tmbPer } = await getTmbInfoByTmbId({ tmbId });
+
+  let teamId = '';
+  let tmbPer = '' as any;
+  try {
+    const tmbInfo = await getTmbInfoByTmbId({ tmbId });
+    teamId = tmbInfo.teamId;
+    tmbPer = tmbInfo.permission;
+  } catch (error) {
+    addLog.error('app的创建者找不到,tmbId不存在', { tmbId, appId });
+  }
 
   const app = await (async () => {
     const app = await MongoApp.findOne({ _id: appId }).lean();
@@ -67,11 +79,11 @@ export const authAppByTmbId = async ({
       };
     }
 
-    if (String(app.teamId) !== teamId) {
+    if (teamId && String(app.teamId) !== teamId) {
       return Promise.reject(AppErrEnum.unAuthApp);
     }
 
-    const isOwner = tmbPer.isOwner || String(app.tmbId) === String(tmbId);
+    const isOwner = (tmbPer && tmbPer.isOwner) || String(app.tmbId) === String(tmbId);
 
     const { Per } = await (async () => {
       if (isOwner) {

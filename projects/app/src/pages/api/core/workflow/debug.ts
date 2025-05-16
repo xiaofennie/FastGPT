@@ -44,7 +44,7 @@ async function handler(
   ]);
 
   // auth balance
-  const { timezone, externalProvider } = await getUserChatInfoAndAuthTeamPoints(tmbId);
+  const { timezone, externalProvider } = await getUserChatInfoAndAuthTeamPoints(tmbId, teamId);
   const lastInteractive = getLastInteractiveValue(history);
 
   /* start process */

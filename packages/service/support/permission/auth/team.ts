@@ -1,10 +1,11 @@
 import { MongoTeamMember } from '../../user/team/teamMemberSchema';
+import { MongoTeam } from '../../user/team/teamSchema';
 import { checkTeamAIPoints } from '../teamLimit';
 import { type UserModelSchema } from '@fastgpt/global/support/user/type';
 import { type TeamSchema } from '@fastgpt/global/support/user/team/type';
 import { TeamErrEnum } from '@fastgpt/global/common/error/code/team';
 
-export async function getUserChatInfoAndAuthTeamPoints(tmbId: string) {
+export async function getUserChatInfoAndAuthTeamPoints(tmbId: string, teamId?: string) {
   const tmb = await MongoTeamMember.findById(tmbId, 'userId teamId')
     .populate<{ user: UserModelSchema; team: TeamSchema }>([
       {
@@ -18,15 +19,23 @@ export async function getUserChatInfoAndAuthTeamPoints(tmbId: string) {
     ])
     .lean();
 
-  if (!tmb) return Promise.reject(TeamErrEnum.notUser);
+  if (!tmb && !teamId) return Promise.reject(TeamErrEnum.notUser);
 
-  await checkTeamAIPoints(tmb.team._id);
+  // 检查团队AI积分
+  // if (tmb) await checkTeamAIPoints(tmb.team._id);
+
+  let teamInfo = null;
+  if (!tmb) {
+    console.error('tmbId不存在', tmbId);
+    teamInfo = await MongoTeam.findById(teamId, 'openaiAccount externalWorkflowVariables').lean();
+  }
 
   return {
-    timezone: tmb.user.timezone,
+    timezone: tmb?.user.timezone ?? 'Asia/Shanghai',
     externalProvider: {
-      openaiAccount: tmb.team.openaiAccount,
-      externalWorkflowVariables: tmb.team.externalWorkflowVariables
+      openaiAccount: tmb?.team.openaiAccount ?? teamInfo?.openaiAccount,
+      externalWorkflowVariables:
+        tmb?.team.externalWorkflowVariables ?? teamInfo?.externalWorkflowVariables
     }
   };
 }

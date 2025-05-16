@@ -42,6 +42,8 @@ import { useToast } from '@fastgpt/web/hooks/useToast';
 
 const CustomPluginRunBox = dynamic(() => import('@/pageComponents/chat/CustomPluginRunBox'));
 
+import { jwtCassWechat } from '@/service/common/system/index';
+
 type Props = {
   appId: string;
   appName: string;
@@ -54,6 +56,9 @@ type Props = {
   responseDetail: boolean;
   // showFullText: boolean;
   showNodeStatus: boolean;
+  cassWebUserSub: string;
+  cassWechatUser: string;
+  cassAppUser: string;
 };
 
 const OutLink = (props: Props) => {
@@ -154,12 +159,36 @@ const OutLink = (props: Props) => {
         '*'
       );
 
+      // cassUserType: "USERID", "USERNUMBER"
+      // cassUserOrigin: 'WEB', 'WECHAT', 'APP'
+
+      let cassUserType,
+        cassUserOrigin,
+        cassUserId = '';
+
+      if (props.cassWebUserSub) {
+        cassUserType = 'USER_LOGIN_ID';
+        cassUserOrigin = 'WEB';
+        cassUserId = props.cassWebUserSub;
+      } else if (props.cassWechatUser) {
+        cassUserType = 'USER_NUMBER';
+        cassUserOrigin = 'WECHAT';
+        cassUserId = props.cassWechatUser;
+      } else if (props.cassAppUser) {
+        cassUserType = 'USER_LOGIN_ID';
+        cassUserOrigin = 'APP';
+        cassUserId = props.cassAppUser;
+      }
+
       const { responseText } = await streamFetch({
         data: {
           messages: histories,
           variables: {
             ...variables,
-            ...customVariables
+            ...customVariables,
+            cassUserType,
+            cassUserOrigin,
+            cassUserId
           },
           responseChatItemId,
           chatId: completionChatId,
@@ -206,7 +235,8 @@ const OutLink = (props: Props) => {
       onUpdateHistoryTitle,
       setChatBoxData,
       forbidLoadChat,
-      onChangeChatId
+      onChangeChatId,
+      props
     ]
   );
 
@@ -405,6 +435,12 @@ export async function getServerSideProps(context: any) {
   const authToken = context?.query?.authToken || '';
   const customUid = context?.query?.customUid || '';
 
+  const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
+  const cassWechatCode = context?.query?.code || '';
+
+  const cookies = context.req.cookies;
+  const cassAppUser = cookies.jwt || '';
+
   const app = await (async () => {
     try {
       return MongoOutLink.findOne(
@@ -421,6 +457,11 @@ export async function getServerSideProps(context: any) {
     }
   })();
 
+  let cassWechatToken = '';
+  if (cassWechatCode) {
+    cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
+  }
+
   return {
     props: {
       appId: app?.appId ? String(app?.appId) : '',
@@ -433,6 +474,9 @@ export async function getServerSideProps(context: any) {
       showNodeStatus: app?.showNodeStatus ?? false,
       shareId: shareId ?? '',
       authToken: authToken ?? '',
+      cassWebUserSub: cassWebAuthToken ?? '',
+      cassWechatUser: cassWechatToken ?? '',
+      cassAppUser: cassAppUser ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }

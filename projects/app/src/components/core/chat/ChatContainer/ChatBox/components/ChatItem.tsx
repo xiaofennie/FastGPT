@@ -1,4 +1,5 @@
-import { Box, type BoxProps, Card, Flex } from '@chakra-ui/react';
+import { Box, Card, Flex, Text } from '@chakra-ui/react';
+import type { BoxProps } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import ChatController, { type ChatControllerProps } from './ChatController';
 import ChatAvatar from './ChatAvatar';
@@ -32,6 +33,8 @@ import { ChatItemContext } from '@/web/core/chat/context/chatItemContext';
 import { eventBus, EventNameEnum } from '@/web/common/utils/eventbus';
 import { addStatisticalDataToHistoryItem } from '@/global/core/chat/utils';
 import { useToast } from '@fastgpt/web/hooks/useToast';
+
+import { useSystemStore } from '@/web/common/system/useSystemStore';
 
 const colorMap = {
   [ChatStatusEnum.loading]: {
@@ -120,6 +123,8 @@ const AIContentCard = React.memo(function AIContentCard({
 
 const ChatItem = (props: Props) => {
   const { type, avatar, statusBoxData, children, isLastChild, questionGuides = [], chat } = props;
+
+  const { feConfigs } = useSystemStore();
 
   const { isPc } = useSystem();
   const { toast } = useToast();
@@ -370,6 +375,16 @@ const ChatItem = (props: Props) => {
                 questionGuides={questionGuides}
               />
             )}
+            {/* 检查AI回答是否为空，如果为空则显示特定文字 */}
+            {(!isChatting || (isChatting && !isLastChild)) &&
+              value.length > 0 &&
+              value[0].type === ChatItemValueTypeEnum.text &&
+              value[0].text &&
+              value[0].text.content.trim() === '' && (
+                <Text fontSize="sm" textAlign="center">
+                  {feConfigs?.emptyText}
+                </Text>
+              )}
             {/* Example: Response tags. A set of dialogs only needs to be displayed once*/}
             {i === splitAiResponseResults.length - 1 && <>{children}</>}
             {/* 对话框底部的复制按钮 */}

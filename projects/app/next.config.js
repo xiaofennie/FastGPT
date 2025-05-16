@@ -23,6 +23,12 @@ const nextConfig = {
       'bson-ext': false,
       'pg-native': false
     });
+
+    // Prevent specific packages from being externalized
+    config.externals = [...(config.externals || [])].filter(
+      (external) => typeof external !== 'string' || !['vega', 'vega-lite'].includes(external)
+    );
+
     config.module = {
       ...config.module,
       rules: config.module.rules.concat([
@@ -77,7 +83,7 @@ const nextConfig = {
     return config;
   },
   // 需要转译的包
-  transpilePackages: ['@modelcontextprotocol/sdk', 'ahooks'],
+  transpilePackages: ['@modelcontextprotocol/sdk', 'ahooks', 'vega', 'vega-lite'],
   experimental: {
     // 优化 Server Components 的构建和运行，避免不必要的客户端打包。
     serverComponentsExternalPackages: [
@@ -85,10 +91,18 @@ const nextConfig = {
       'pg',
       'bullmq',
       '@zilliz/milvus2-sdk-node',
-      "tiktoken",
+      'tiktoken'
     ],
     outputFileTracingRoot: path.join(__dirname, '../../'),
     instrumentationHook: true
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/fastgpt/chat',
+        destination: '/api/fastgpt/chat'
+      }
+    ];
   }
 };
 
