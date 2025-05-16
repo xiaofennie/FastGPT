@@ -43,7 +43,7 @@ async function handler(
   ]);
 
   // auth balance
-  const { timezone, externalProvider } = await getUserChatInfoAndAuthTeamPoints(tmbId);
+  const { timezone, externalProvider } = await getUserChatInfoAndAuthTeamPoints(tmbId, teamId);
 
   /* start process */
   const { flowUsages, flowResponses, debugResponse, newVariables, workflowInteractiveResponse } =
