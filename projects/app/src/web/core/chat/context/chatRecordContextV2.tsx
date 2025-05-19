@@ -2,7 +2,7 @@ import type { getPaginationRecordsBody } from '@/pages/api/core/chat/getPaginati
 import type { ChatSiteItemType } from '@fastgpt/global/core/chat/type';
 import type { PaginationResponse } from '@fastgpt/web/common/fetch/type';
 import { useScrollPagination } from '@fastgpt/web/hooks/useScrollPagination';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createContext, useContextSelector } from 'use-context-selector';
 import { ChatItemContext } from './chatItemContext';

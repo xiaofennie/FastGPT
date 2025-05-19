@@ -62,7 +62,7 @@ const TeamSelector = () => {
     <MySelect
       value={userInfo?.team?.teamId}
       list={list}
-      onchange={handleTeamChange}
+      onChange={handleTeamChange}
       placeholder="选择团队"
     />
   );
