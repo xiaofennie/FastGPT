@@ -21,7 +21,10 @@ const nextConfig = {
       kerberos: false,
       'supports-color': false,
       'bson-ext': false,
-      'pg-native': false
+      'pg-native': false,
+      'pg-cloudflare': false,
+      canvas: false, // 禁用 canvas 模块
+      'cloudflare:sockets': false
     });
 
     // Prevent specific packages from being externalized
@@ -70,7 +73,9 @@ const nextConfig = {
         ...config.resolve,
         fallback: {
           ...config.resolve.fallback,
-          fs: false
+          fs: false,
+          'pg-cloudflare': false,
+          'cloudflare:sockets': false
         }
       };
     }

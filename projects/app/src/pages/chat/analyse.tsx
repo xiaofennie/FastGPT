@@ -11,13 +11,12 @@ import type { StartChatFnProps } from '@/components/core/chat/ChatContainer/type
 import PageContainer from '@/components/PageContainer';
 import ChatHeader from '@/pageComponents/chat/ChatHeaderV2';
 import ChatHistorySlider from '@/pageComponents/chat/ChatHistorySliderV2';
-import { serviceSideProps } from '@fastgpt/web/common/system/nextjs';
+import { serviceSideProps } from '@/web/common/i18n/utils';
 import { useTranslation } from 'next-i18next';
 import { getInitOutLinkChatInfo } from '@/web/core/chat/api';
 import { getChatTitleFromChatMessage } from '@fastgpt/global/core/chat/utils';
 import { MongoApp } from '@fastgpt/service/core/app/schema';
 import { addLog } from '@fastgpt/service/common/system/log';
-import { connectToDatabase } from '@/service/mongo';
 import NextHead from '@/components/common/NextHead';
 import { useContextSelector } from 'use-context-selector';
 import ChatContextProvider, { ChatContext } from '@/web/core/chat/context/chatContextV2';
@@ -236,6 +235,7 @@ const Render = (props: Props) => {
         showRouteToAppDetail={false}
         showRouteToDatasetDetail={false}
         isShowReadRawSource={false}
+        isResponseDetail={false}
         showNodeStatus={false}
       >
         <ChatRecordContextProvider params={chatRecordProviderParams}>
@@ -255,7 +255,6 @@ export async function getServerSideProps(context: any) {
 
   const app = await (async () => {
     try {
-      await connectToDatabase();
       const app = (await MongoApp.findOne(
         {
           _id: appId

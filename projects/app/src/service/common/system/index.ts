@@ -33,7 +33,6 @@ import { preLoadWorker } from '@fastgpt/service/worker/preload';
 import type { JwtPayload } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
 import { addLog } from '@fastgpt/service/common/system/log';
-import { connectToDatabase } from '@/service/mongo';
 import { connectionMongo } from '@fastgpt/service/common/mongo';
 import axios from 'axios';
 
@@ -271,8 +270,6 @@ export function jwtCassWechat(appId: string | undefined, code: String) {
       addLog.error('jwtCassWechat: appId为空');
       resolve(null);
     }
-
-    await connectToDatabase();
 
     // 获取数据库实例
     const db = connectionMongo.connection.db;
