@@ -18,7 +18,6 @@ import { Box, Checkbox } from '@chakra-ui/react';
 import { EventNameEnum, eventBus } from '@/web/common/utils/eventbus';
 import { chats2GPTMessages } from '@fastgpt/global/core/chat/adapt';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/router';
 import { useSystemStore } from '@/web/common/system/useSystemStore';
 import { useTranslation } from 'next-i18next';
 import {
@@ -36,7 +35,7 @@ import type { ChatBoxInputType, ChatBoxInputFormType, SendPromptFnType } from '.
 import type { StartChatFnProps, generatingMessageProps } from '../type';
 import ChatInput from './Input/ChatInput';
 import ChatBoxDivider from '../../Divider';
-import type { OutLinkChatAuthProps } from '@fastgpt/global/support/permission/chat';
+import { type OutLinkChatAuthProps } from '@fastgpt/global/support/permission/chat';
 import { getNanoid } from '@fastgpt/global/common/string/tools';
 import {
   ChatItemValueTypeEnum,
@@ -50,8 +49,7 @@ import {
 } from './utils';
 import { textareaMinH } from './constants';
 import { SseResponseEventEnum } from '@fastgpt/global/core/workflow/runtime/constants';
-import type { ChatProviderProps } from './ProviderV2';
-import ChatProvider, { ChatBoxContext } from './ProviderV2';
+import ChatProvider, { ChatBoxContext, type ChatProviderProps } from './ProviderV2';
 
 import ChatItem from './components/ChatItem';
 
@@ -67,6 +65,8 @@ import { ChatRecordContext } from '@/web/core/chat/context/chatRecordContextV2';
 import { ChatItemContext } from '@/web/core/chat/context/chatItemContext';
 import TimeBox from './components/TimeBox';
 import MyBox from '@fastgpt/web/components/common/MyBox';
+import { VariableInputEnum } from '@fastgpt/global/core/workflow/constants';
+import { valueTypeFormat } from '@fastgpt/global/core/workflow/runtime/utils';
 
 const ResponseTags = dynamic(() => import('./components/ResponseTagsV2'));
 const FeedbackModal = dynamic(() => import('./components/FeedbackModal'));
@@ -105,14 +105,10 @@ const ChatBox = ({
   showVoiceIcon = true,
   showEmptyIntro = false,
   active = true,
-  shareId,
-  outLinkUid,
-  teamId,
-  teamToken,
-  onStartChat
+  onStartChat,
+  chatType
 }: Props) => {
   const ScrollContainerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const { t } = useTranslation();
   const { toast } = useToast();
   const { feConfigs } = useSystemStore();
@@ -136,6 +132,8 @@ const ChatBox = ({
   const chatBoxData = useContextSelector(ChatItemContext, (v) => v.chatBoxData);
   const ChatBoxRef = useContextSelector(ChatItemContext, (v) => v.ChatBoxRef);
   const variablesForm = useContextSelector(ChatItemContext, (v) => v.variablesForm);
+  const setIsVariableVisible = useContextSelector(ChatItemContext, (v) => v.setIsVariableVisible);
+
   const chatRecords = useContextSelector(ChatRecordContext, (v) => v.chatRecords);
   const setChatRecords = useContextSelector(ChatRecordContext, (v) => v.setChatRecords);
   const isChatRecordsLoaded = useContextSelector(ChatRecordContext, (v) => v.isChatRecordsLoaded);
@@ -157,6 +155,12 @@ const ChatBox = ({
   // Workflow running, there are user input or selection
   const isInteractive = useMemo(() => checkIsInteractiveByHistories(chatRecords), [chatRecords]);
 
+  const externalVariableList = useMemo(() => {
+    if (chatType === 'chat') {
+      return allVariableList.filter((item) => item.type === VariableInputEnum.custom);
+    }
+    return [];
+  }, [allVariableList, chatType]);
   // compute variable input is finish.
   const chatForm = useForm<ChatBoxInputFormType>({
     defaultValues: {
@@ -169,7 +173,9 @@ const ChatBox = ({
   const chatStartedWatch = watch('chatStarted');
   const chatStarted =
     chatBoxData?.appId === appId &&
-    (chatStartedWatch || chatRecords.length > 0 || variableList.length === 0);
+    (chatStartedWatch ||
+      chatRecords.length > 0 ||
+      [...variableList, ...externalVariableList].length === 0);
 
   // 滚动到底部
   const scrollToBottom = useMemoizedFn((behavior: 'smooth' | 'auto' = 'smooth', delay = 0) => {
@@ -208,12 +214,15 @@ const ChatBox = ({
     ({
       event,
       text = '',
+      reasoningText,
       status,
       name,
       tool,
       interactive,
       autoTTSResponse,
-      variables
+      variables,
+      nodeResponse,
+      durationSeconds
     }: generatingMessageProps & { autoTTSResponse?: boolean }) => {
       setChatRecords((state) =>
         state.map((item, index) => {
@@ -226,12 +235,38 @@ const ChatBox = ({
             JSON.stringify(item.value[item.value.length - 1])
           );
 
-          if (event === SseResponseEventEnum.flowNodeStatus && status) {
+          if (event === SseResponseEventEnum.flowNodeResponse && nodeResponse) {
+            return {
+              ...item,
+              responseData: item.responseData
+                ? [...item.responseData, nodeResponse]
+                : [nodeResponse]
+            };
+          } else if (event === SseResponseEventEnum.flowNodeStatus && status) {
             return {
               ...item,
               status,
               moduleName: name
             };
+          } else if (reasoningText) {
+            if (lastValue.type === ChatItemValueTypeEnum.reasoning && lastValue.reasoning) {
+              lastValue.reasoning.content += reasoningText;
+              return {
+                ...item,
+                value: item.value.slice(0, -1).concat(lastValue)
+              };
+            } else {
+              const val: AIChatItemValueItemType = {
+                type: ChatItemValueTypeEnum.reasoning,
+                reasoning: {
+                  content: reasoningText
+                }
+              };
+              return {
+                ...item,
+                value: item.value.concat(val)
+              };
+            }
           } else if (
             (event === SseResponseEventEnum.answer || event === SseResponseEventEnum.fastAnswer) &&
             text
@@ -307,6 +342,13 @@ const ChatBox = ({
             return {
               ...item,
               value: item.value.concat(val)
+            };
+          } else if (event === SseResponseEventEnum.workflowDuration && durationSeconds) {
+            return {
+              ...item,
+              durationSeconds: item.durationSeconds
+                ? +(item.durationSeconds + durationSeconds).toFixed(2)
+                : durationSeconds
             };
           }
 
@@ -407,12 +449,13 @@ const ChatBox = ({
           // Only declared variables are kept
           const requestVariables: Record<string, any> = {};
           allVariableList?.forEach((item) => {
-            requestVariables[item.key] =
+            const val =
               variables[item.key] === '' ||
               variables[item.key] === undefined ||
               variables[item.key] === null
                 ? item.defaultValue
                 : variables[item.key];
+            requestVariables[item.key] = valueTypeFormat(val, item.valueType);
           });
 
           const responseChatId = getNanoid(24);
@@ -431,7 +474,7 @@ const ChatBox = ({
               time: new Date(),
               hideInUI,
               value: [
-                ...files.map((file) => ({
+                ...files.map((file: any) => ({
                   type: ChatItemValueTypeEnum.file,
                   file: {
                     type: file.type,
@@ -493,36 +536,34 @@ const ChatBox = ({
               reserveTool: true
             });
 
-            const {
-              responseData,
-              responseText,
-              isNewChat = false
-            } = await onStartChat({
+            const { responseText } = await onStartChat({
               messages, // 保证最后一条是 Human 的消息
               responseChatItemId: responseChatId,
               controller: abortSignal,
               generatingMessage: (e) => generatingMessage({ ...e, autoTTSResponse }),
               variables: requestVariables
             });
-            if (responseData?.[responseData.length - 1]?.error) {
-              toast({
-                title: t(responseData[responseData.length - 1].error?.message),
-                status: 'error'
-              });
-            }
 
             // Set last chat finish status
             let newChatHistories: ChatSiteItemType[] = [];
             setChatRecords((state) => {
               newChatHistories = state.map((item, index) => {
                 if (index !== state.length - 1) return item;
+
+                // Check node response error
+                const responseData = mergeChatResponseData(item.responseData || []);
+                if (responseData[responseData.length - 1]?.error) {
+                  toast({
+                    title: t(responseData[responseData.length - 1].error?.message),
+                    status: 'error'
+                  });
+                }
+
                 return {
                   ...item,
                   status: ChatStatusEnum.finish,
                   time: new Date(),
-                  responseData: item.responseData
-                    ? mergeChatResponseData([...item.responseData, ...responseData])
-                    : responseData
+                  responseData
                 };
               });
               return newChatHistories;
@@ -542,7 +583,7 @@ const ChatBox = ({
           } catch (err: any) {
             console.log(err);
             toast({
-              title: t(getErrText(err, 'core.chat.error.Chat error') as any),
+              title: t(getErrText(err, t('common:core.chat.error.Chat error') as any)),
               status: 'error',
               duration: 5000,
               isClosable: true
@@ -782,12 +823,14 @@ const ChatBox = ({
       showEmptyIntro &&
       chatRecords.length === 0 &&
       !variableList?.length &&
+      !externalVariableList?.length &&
       !welcomeText,
     [
       chatRecords.length,
       feConfigs?.show_emptyChat,
       showEmptyIntro,
       variableList?.length,
+      externalVariableList?.length,
       welcomeText
     ]
   );
@@ -798,7 +841,7 @@ const ChatBox = ({
 
     return {
       status: chatContent.status || ChatStatusEnum.loading,
-      name: t(chatContent.moduleName || ('' as any)) || t('common:common.Loading')
+      name: t(chatContent.moduleName || ('' as any)) || t('common:Loading')
     };
   }, [chatRecords, isChatting, t]);
 
@@ -878,6 +921,33 @@ const ChatBox = ({
     }
   }));
 
+  // Visibility check
+  useEffect(() => {
+    const checkVariableVisibility = () => {
+      if (!ScrollContainerRef.current) return;
+      const container = ScrollContainerRef.current;
+      const variableInput = container.querySelector('#variable-input');
+      if (!variableInput) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = variableInput.getBoundingClientRect();
+
+      setIsVariableVisible(
+        elementRect.bottom > containerRect.top && elementRect.top < containerRect.bottom
+      );
+    };
+
+    const container = ScrollContainerRef.current;
+    if (container) {
+      checkVariableVisibility();
+      container.addEventListener('scroll', checkVariableVisibility);
+
+      return () => {
+        container.removeEventListener('scroll', checkVariableVisibility);
+      };
+    }
+  }, [chatType, setIsVariableVisible]);
+
   const RenderRecords = useMemo(() => {
     return (
       <ScrollData
@@ -893,8 +963,14 @@ const ChatBox = ({
           {showEmpty && <Empty />}
           {!!welcomeText && <WelcomeBox welcomeText={welcomeText} />}
           {/* variable input */}
-          {!!variableList?.length && (
-            <VariableInput chatStarted={chatStarted} chatForm={chatForm} />
+          {(!!variableList?.length || !!externalVariableList?.length) && (
+            <Box id="variable-input">
+              <VariableInput
+                chatStarted={chatStarted}
+                chatForm={chatForm}
+                showExternalVariables={chatType === 'chat'}
+              />
+            </Box>
           )}
           {/* chat history */}
           <Box id={'history'}>
@@ -909,14 +985,14 @@ const ChatBox = ({
 
                 <Box py={item.hideInUI ? 0 : 6}>
                   {item.obj === ChatRoleEnum.Human && !item.hideInUI && (
-                    <>
-                      <ChatItem
-                        type={item.obj}
-                        avatar={userAvatar}
-                        chat={item}
-                        isLastChild={index === chatRecords.length - 1}
-                      />
-                    </>
+                    <ChatItem
+                      type={item.obj}
+                      avatar={userAvatar}
+                      chat={item}
+                      onRetry={retryInput(item.dataId)}
+                      onDelete={delOneMessage(item.dataId)}
+                      isLastChild={index === chatRecords.length - 1}
+                    />
                   )}
                   {item.obj === ChatRoleEnum.AI && (
                     <ChatItem
@@ -926,10 +1002,6 @@ const ChatBox = ({
                       isLastChild={index === chatRecords.length - 1}
                       {...{
                         showVoiceIcon,
-                        shareId,
-                        outLinkUid,
-                        teamId,
-                        teamToken,
                         statusBoxData,
                         questionGuides,
                         onMark: onMark(
@@ -997,6 +1069,9 @@ const ChatBox = ({
     chatForm,
     chatRecords,
     chatStarted,
+    chatType,
+    delOneMessage,
+    externalVariableList?.length,
     isChatting,
     onAddUserDislike,
     onAddUserLike,
@@ -1004,16 +1079,13 @@ const ChatBox = ({
     onCloseUserLike,
     onMark,
     onReadUserDislike,
-    outLinkUid,
     questionGuides,
-    shareId,
+    retryInput,
     showEmpty,
     showMarkIcon,
     showVoiceIcon,
     statusBoxData,
     t,
-    teamId,
-    teamToken,
     userAvatar,
     variableList?.length,
     welcomeText

@@ -4,37 +4,26 @@
   
   ARG proxy
   
+  # RUN [ -z "$proxy" ] || sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
   RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-  
-  # Add system dependencies for canvas
+
   RUN apk add --no-cache \
-      libc6-compat \
-      build-base \
-      cairo-dev \
-      pango-dev \
-      jpeg-dev \
-      giflib-dev \
-      pixman-dev \
-      pangomm-dev \
-      libjpeg-turbo-dev \
-      freetype-dev \
-      python3 \
-      g++ \
-      make \
-      cairo \
-      pango \
-      libjpeg-turbo \
-      giflib \
-      librsvg-dev \
-      pkgconfig \
-      pixman \
-      git
-  
-  # Set environment variables for node-canvas
-  ENV CXXFLAGS=-std=c++17
-  ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
-  ENV LD_LIBRARY_PATH=/usr/lib
-  
+    libc6-compat \
+    python3 \
+    make \
+    g++ \
+    jpeg-dev \
+    cairo-dev \
+    giflib-dev \
+    pango-dev \
+    libtool \
+    autoconf \
+    automake \
+    pixman-dev \
+    pkgconfig \
+    build-base \
+    python3
+
   RUN npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
   
   # copy packages and one project
@@ -46,6 +35,11 @@
   
   # if proxy exists, set proxy
   RUN pnpm i --registry=https://registry.npmmirror.com
+  # RUN if [ -z "$proxy" ]; then \
+  #         pnpm i; \
+  #     else \
+  #         pnpm i --registry=https://registry.npmmirror.com; \
+  #     fi
   
   # --------- builder -----------
   FROM registry.cn-shenzhen.aliyuncs.com/starsl/node:20.14.0-alpine AS builder
@@ -59,40 +53,14 @@
   COPY --from=maindeps /app/node_modules ./node_modules
   COPY --from=maindeps /app/packages ./packages
   COPY ./projects/app ./projects/app
+  RUN rm -rf ./projects/app/node_modules
   COPY --from=maindeps /app/projects/app/node_modules ./projects/app/node_modules
   
-  RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+  RUN [ -z "$proxy" ] || sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
   
-  RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
-  
-  
-  # Add system dependencies for canvas
-  RUN apk add --no-cache \
-      build-base \
-      cairo-dev \
-      pango-dev \
-      jpeg-dev \
-      giflib-dev \
-      pixman-dev \
-      pangomm-dev \
-      libjpeg-turbo-dev \
-      freetype-dev \
-      python3 \
-      g++ \
-      make \
-      cairo \
-      pango \
-      libjpeg-turbo \
-      giflib \
-      librsvg-dev \
-      pkgconfig \
-      pixman \
-      git
-  
-  # Set environment variables for node-canvas
-  ENV CXXFLAGS=-std=c++17
-  ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
-  ENV LD_LIBRARY_PATH=/usr/lib
+  RUN apk add --no-cache libc6-compat
+
+  RUN npm install -g pnpm@9.4.0 --registry=https://registry.npmmirror.com
   
   ENV NODE_OPTIONS="--max-old-space-size=4096"
   ENV NEXT_PUBLIC_BASE_URL=$base_url
@@ -109,7 +77,7 @@
   RUN addgroup --system --gid 1001 nodejs
   RUN adduser --system --uid 1001 nextjs
   
-  RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+  RUN [ -z "$proxy" ] || sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
   RUN apk add --no-cache curl ca-certificates \
     && update-ca-certificates
   
@@ -135,6 +103,8 @@
   # copy config
   COPY ./projects/app/data /app/data
   RUN chown -R nextjs:nodejs /app/data
+  
+  # Add tmp directory permission control
   
   ENV NODE_ENV=production
   ENV NEXT_TELEMETRY_DISABLED=1
