@@ -16,7 +16,7 @@ import { useTranslation } from 'next-i18next';
 import MyModal from '@fastgpt/web/components/common/MyModal';
 import MyTooltip from '@fastgpt/web/components/common/MyTooltip';
 
-const MemorySwitch = ({
+const ButtonsSwitch = ({
   value = { open: false, metadata: [] },
   onChange
 }: {
@@ -30,7 +30,7 @@ const MemorySwitch = ({
 
   return (
     <Flex alignItems={'center'}>
-      <MyIcon name={'core/app/simpleMode/ai'} mr={2} w={'20px'} />
+      <MyIcon name={'core/app/simpleMode/promot'} mr={2} w={'20px'} />
       <FormLabel color={'myGray.600'}>底部快捷按钮</FormLabel>
       <Box flex={1} />
       <MyTooltip label={'配置底部快捷按钮'}>
@@ -47,7 +47,7 @@ const MemorySwitch = ({
 
       <MyModal
         title={'底部快捷按钮'}
-        iconSrc={'core/app/simpleMode/ai'}
+        iconSrc={'core/app/simpleMode/promot'}
         isOpen={isOpen}
         onClose={onClose}
       >
@@ -126,4 +126,4 @@ const MemorySwitch = ({
   );
 };
 
-export default MemorySwitch;
+export default ButtonsSwitch;
