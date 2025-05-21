@@ -19,7 +19,8 @@ export const chatConfigType = {
   fileSelectConfig: Object,
   instruction: String,
   autoExecute: Object,
-  memoryConfig: Object
+  memoryConfig: Object,
+  buttonsConfig: Object
 };
 
 // schema

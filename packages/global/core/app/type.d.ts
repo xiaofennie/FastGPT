@@ -121,6 +121,8 @@ export type AppChatConfigType = {
     minScore: number;
     metadata: Record<string, any>;
   };
+
+  buttonsConfig?: AppButtonsConfigType;
 };
 export type SettingAIDataType = {
   model: string;
@@ -197,6 +199,11 @@ export type AppFileSelectConfigType = {
   canSelectFile: boolean;
   canSelectImg: boolean;
   maxFiles: number;
+};
+// Buttons
+export type AppButtonsConfigType = {
+  open: boolean;
+  metadata: any[];
 };
 
 export type SystemPluginListItemType = {

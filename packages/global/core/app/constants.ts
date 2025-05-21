@@ -2,6 +2,7 @@ import { PROMPT_QUESTION_GUIDE } from '../ai/prompt/agent';
 import {
   AppTTSConfigType,
   AppFileSelectConfigType,
+  AppButtonsConfigType,
   AppWhisperConfigType,
   AppAutoExecuteConfigType,
   AppQGConfigType
@@ -46,6 +47,11 @@ export const defaultAppSelectFileConfig: AppFileSelectConfigType = {
   canSelectFile: false,
   canSelectImg: false,
   maxFiles: 10
+};
+
+export const defaultAppButtonsConfig: AppButtonsConfigType = {
+  open: false,
+  metadata: []
 };
 
 export enum AppTemplateTypeEnum {
