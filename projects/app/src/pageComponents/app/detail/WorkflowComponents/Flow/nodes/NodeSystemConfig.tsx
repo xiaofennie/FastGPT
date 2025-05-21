@@ -28,6 +28,7 @@ import { userFilesInput } from '@fastgpt/global/core/workflow/template/system/wo
 import Container from '../components/Container';
 import AutoExecConfig from '@/components/core/app/AutoExecConfig';
 import MemorySwitch from '@/components/core/app/MemorySwitch';
+import ButtonConfig from '@/components/core/app/ButtonsSwitch';
 
 type ComponentProps = {
   chatConfig: AppChatConfigType;
@@ -91,6 +92,9 @@ const NodeUserGuide = ({ data, selected }: NodeProps<FlowNodeItemType>) => {
             </Box>
             <Box mt={3} pt={3} borderTop={'base'} borderColor={'myGray.200'}>
               <QuestionInputGuide {...componentsProps} />
+            </Box>
+            <Box mt={3} pt={3} borderTop={'base'} borderColor={'myGray.200'}>
+              <ButtonGuide {...componentsProps} />
             </Box>
             <Box mt={3} pt={3} borderTop={'base'} borderColor={'myGray.200'}>
               <MemoryGuide {...componentsProps} />
@@ -306,6 +310,26 @@ function MemoryGuide({
           chatConfig: {
             ...state.chatConfig,
             memoryConfig: e
+          }
+        }));
+      }}
+    />
+  ) : null;
+}
+
+function ButtonGuide({
+  chatConfig: { buttonsConfig = { open: false, metadata: [] } },
+  setAppDetail
+}: ComponentProps) {
+  return buttonsConfig ? (
+    <ButtonConfig
+      value={buttonsConfig}
+      onChange={(e) => {
+        setAppDetail((state) => ({
+          ...state,
+          chatConfig: {
+            ...state.chatConfig,
+            buttonsConfig: e
           }
         }));
       }}

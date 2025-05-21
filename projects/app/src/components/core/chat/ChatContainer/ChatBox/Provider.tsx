@@ -7,12 +7,14 @@ import {
   type AppTTSConfigType,
   type AppWhisperConfigType,
   type ChatInputGuideConfigType,
-  type VariableItemType
+  type VariableItemType,
+  type AppButtonsConfigType
 } from '@fastgpt/global/core/app/type';
 import { type ChatHistoryItemResType } from '@fastgpt/global/core/chat/type';
 import {
   defaultAppSelectFileConfig,
   defaultChatInputGuideConfig,
+  defaultAppButtonsConfig,
   defaultQGConfig,
   defaultTTSConfig,
   defaultWhisperConfig
@@ -62,6 +64,7 @@ type useChatStoreType = ChatProviderProps & {
   chatInputGuide: ChatInputGuideConfigType;
   getHistoryResponseData: ({ dataId }: { dataId: string }) => Promise<ChatHistoryItemResType[]>;
   fileSelectConfig: AppFileSelectConfigType;
+  buttonsConfig: AppButtonsConfigType;
 
   appId: string;
   chatId: string;
@@ -174,6 +177,10 @@ const Provider = ({
     ChatItemContext,
     (v) => v.chatBoxData?.app?.chatConfig?.fileSelectConfig ?? defaultAppSelectFileConfig
   );
+  const buttonsConfig = useContextSelector(
+    ChatItemContext,
+    (v) => v.chatBoxData?.app?.chatConfig?.buttonsConfig ?? defaultAppButtonsConfig
+  );
 
   const chatRecords = useContextSelector(ChatRecordContext, (v) => v.chatRecords);
   const setChatRecords = useContextSelector(ChatRecordContext, (v) => v.setChatRecords);
@@ -232,6 +239,7 @@ const Provider = ({
     questionGuide,
     ttsConfig,
     fileSelectConfig,
+    buttonsConfig,
     whisperConfig,
     autoTTSResponse,
     startSegmentedAudio,

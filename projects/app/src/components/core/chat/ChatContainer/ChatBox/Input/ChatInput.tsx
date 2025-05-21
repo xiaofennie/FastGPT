@@ -1,5 +1,5 @@
 import { useSystemStore } from '@/web/common/system/useSystemStore';
-import { Box, Flex, Spinner, Textarea } from '@chakra-ui/react';
+import { Box, Flex, Spinner, Textarea, ButtonGroup, Button } from '@chakra-ui/react';
 import React, { useRef, useEffect, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import MyTooltip from '@fastgpt/web/components/common/MyTooltip';
@@ -56,6 +56,7 @@ const ChatInput = ({
   const whisperConfig = useContextSelector(ChatBoxContext, (v) => v.whisperConfig);
   const chatInputGuide = useContextSelector(ChatBoxContext, (v) => v.chatInputGuide);
   const fileSelectConfig = useContextSelector(ChatBoxContext, (v) => v.fileSelectConfig);
+  const buttonsConfig = useContextSelector(ChatBoxContext, (v) => v.buttonsConfig);
 
   const fileCtrl = useFieldArray({
     control,
@@ -82,7 +83,8 @@ const ChatInput = ({
     chatId
   });
   const havInput = !!inputValue || fileList.length > 0;
-  const canSendMessage = havInput && !hasFileUploading;
+  const canSendMessage =
+    (havInput && !hasFileUploading) || (buttonsConfig.open && !hasFileUploading);
 
   // Upload files
   useRequest2(uploadFiles, {
@@ -331,6 +333,30 @@ const ChatInput = ({
         }
       }}
     >
+      {/* buttons */}
+      {buttonsConfig.open && (
+        <Box px={[1, 3]} pb={2}>
+          <ButtonGroup spacing={2}>
+            {buttonsConfig.metadata.map((value, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                borderRadius="lg"
+                size="sm"
+                colorScheme="gray"
+                _hover={{ bg: 'gray.50' }}
+                onClick={() => {
+                  console.log(value, '==chatInput===');
+                  handleSend(value);
+                }}
+              >
+                {value}
+              </Button>
+            ))}
+          </ButtonGroup>
+        </Box>
+      )}
+
       <Box
         pt={fileList.length > 0 ? '0' : ['14px', '18px']}
         pb={['14px', '18px']}

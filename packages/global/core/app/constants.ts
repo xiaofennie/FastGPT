@@ -3,7 +3,8 @@ import {
   type AppFileSelectConfigType,
   type AppWhisperConfigType,
   type AppAutoExecuteConfigType,
-  type AppQGConfigType
+  type AppQGConfigType,
+  type AppButtonsConfigType
 } from './type';
 
 export enum AppTypeEnum {
@@ -47,6 +48,11 @@ export const defaultAppSelectFileConfig: AppFileSelectConfigType = {
   canSelectFile: false,
   canSelectImg: false,
   maxFiles: 10
+};
+
+export const defaultAppButtonsConfig: AppButtonsConfigType = {
+  open: false,
+  metadata: []
 };
 
 export enum AppTemplateTypeEnum {
