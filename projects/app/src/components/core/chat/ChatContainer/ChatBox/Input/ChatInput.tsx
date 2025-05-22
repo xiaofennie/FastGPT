@@ -308,6 +308,7 @@ const ChatInput = ({
       w={'100%'}
       maxW={['auto', 'min(800px, 100%)']}
       px={[0, 5]}
+      overflowX="hidden"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -335,8 +336,8 @@ const ChatInput = ({
     >
       {/* buttons */}
       {buttonsConfig.open && (
-        <Box px={[1, 3]} pb={2}>
-          <ButtonGroup spacing={2}>
+        <Box px={[1, 3]} pb={2} overflowX="auto">
+          <ButtonGroup spacing={2} whiteSpace="nowrap">
             {buttonsConfig.metadata.map((value, index) => (
               <Button
                 key={index}
