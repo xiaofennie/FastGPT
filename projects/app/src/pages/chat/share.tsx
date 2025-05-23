@@ -458,7 +458,8 @@ export async function getServerSideProps(context: any) {
   })();
 
   let cassWechatToken = '';
-  if (cassWechatCode) {
+  !context.req.url?.includes('/_next/data/') && console.log('cassWechatCode=====', cassWechatCode);
+  if (cassWechatCode && !context.req.url?.includes('/_next/data/')) {
     cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
   }
 

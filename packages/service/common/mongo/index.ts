@@ -97,7 +97,8 @@ export const getMongoLogModel = <T>(name: string, schema: mongoose.Schema) => {
 const syncMongoIndex = async (model: Model<any>) => {
   if (process.env.SYNC_INDEX !== '0' && process.env.NODE_ENV !== 'test') {
     try {
-      model.syncIndexes({ background: true });
+      // model.syncIndexes({ background: true });
+      model.createIndexes({ background: true });
     } catch (error) {
       addLog.error('Create index error', error);
     }
