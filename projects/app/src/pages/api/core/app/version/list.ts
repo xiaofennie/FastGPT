@@ -26,8 +26,7 @@ async function handler(
   await authApp({ appId, req, per: WritePermissionVal, authToken: true });
 
   const match = {
-    appId,
-    isPublish
+    appId
   };
 
   const [result, total] = await Promise.all([
@@ -39,6 +38,8 @@ async function handler(
         .skip(offset)
         .limit(pageSize)
         .lean();
+
+      console.log('versions', versions);
 
       return addSourceMember({
         list: versions
