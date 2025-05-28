@@ -44,6 +44,20 @@ const CustomPluginRunBox = dynamic(() => import('@/pageComponents/chat/CustomPlu
 
 import { jwtCassWechat } from '@/service/common/system/index';
 
+// 添加企业微信 token 缓存
+const wechatTokenCache = new Map<string, { token: string; timestamp: number }>();
+const CACHE_DURATION = 2 * 60 * 1000; // 5分钟缓存时间
+
+// 清理过期缓存的函数
+const cleanExpiredCache = () => {
+  const now = Date.now();
+  for (const [key, value] of wechatTokenCache.entries()) {
+    if (now - value.timestamp > CACHE_DURATION) {
+      wechatTokenCache.delete(key);
+    }
+  }
+};
+
 type Props = {
   appId: string;
   appName: string;
@@ -159,12 +173,15 @@ const OutLink = (props: Props) => {
         '*'
       );
 
-      // cassUserType: "USERID", "USERNUMBER"
-      // cassUserOrigin: 'WEB', 'WECHAT', 'APP'
-
       let cassUserType,
         cassUserOrigin,
         cassUserId = '';
+
+      console.log(
+        `WEB: ${props.cassWebUserSub}`,
+        `企微: ${props.cassWechatUser}`,
+        `APP: ${props.cassAppUser}`
+      );
 
       if (props.cassWebUserSub) {
         cassUserType = 'USER_LOGIN_ID';
@@ -458,9 +475,34 @@ export async function getServerSideProps(context: any) {
   })();
 
   let cassWechatToken = '';
-  !context.req.url?.includes('/_next/data/') && console.log('cassWechatCode=====', cassWechatCode);
-  if (cassWechatCode && !context.req.url?.includes('/_next/data/')) {
-    cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
+
+  if (cassWechatCode) {
+    // 清理过期缓存
+    cleanExpiredCache();
+
+    // 创建缓存键
+    const cacheKey = `${app?.appId}-${cassWechatCode}`;
+    const cachedData = wechatTokenCache.get(cacheKey);
+    const now = Date.now();
+
+    // 检查缓存是否存在且未过期
+    if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
+      cassWechatToken = cachedData.token;
+      console.log('从缓存获取企微 token:', cassWechatToken);
+    } else if (!context.req.url?.includes('/_next/data/')) {
+      // 只在第一次请求时调用 API
+      cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
+      console.log('获得企微 token:', cassWechatToken);
+
+      // 将结果存入缓存
+      if (cassWechatToken) {
+        wechatTokenCache.set(cacheKey, {
+          token: cassWechatToken,
+          timestamp: now
+        });
+        console.log('企微 token 已缓存');
+      }
+    }
   }
 
   return {

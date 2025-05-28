@@ -118,6 +118,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     metadata
   } = req.body as Props;
 
+  console.log('variables', variables);
+
   if (variables.cassUserOrigin && variables.cassUserId) {
     switch (variables.cassUserOrigin) {
       case 'WEB':
