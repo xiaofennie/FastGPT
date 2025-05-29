@@ -558,6 +558,8 @@ async function replaceSystemPluginResponse({
           fileId
         });
 
+        console.log('token=====:', token);
+
         // 使用新的API路由，将token放在路径中
         response[key] = `${ReadFileBaseUrl}/${encodeURIComponent(token)}/${filename}`;
       } catch (error) {

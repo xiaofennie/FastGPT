@@ -6,8 +6,8 @@ import type { SystemPluginSpecialResponse } from '../../../type';
 // Types
 interface Props {
   title: string;
-  xAxis: string;
-  yAxis: string;
+  xAxis: string[];
+  yAxis: string[];
   chartType: string;
 }
 
@@ -16,10 +16,14 @@ type Response = Promise<{
 }>;
 
 // Helper Functions
-const parseChartData = (xAxis: string, yAxis: string) => {
+const parseChartData = (xAxis: string | string[], yAxis: string | string[]) => {
   try {
-    const parsedXAxis = xAxis.split(',').map((x) => x.trim());
-    const parsedYAxis = yAxis.split(',').map((x) => Number(x.trim()));
+    // 处理xAxis - 如果是数组直接使用，如果是字符串则分割
+    const parsedXAxis = Array.isArray(xAxis) ? xAxis : JSON.parse(xAxis);
+
+    // 处理yAxis - 如果是数组直接使用，如果是字符串则分割
+    const parsedYAxis = Array.isArray(yAxis) ? yAxis : JSON.parse(yAxis);
+
     return {
       xAxis: parsedXAxis,
       yAxis: parsedYAxis
