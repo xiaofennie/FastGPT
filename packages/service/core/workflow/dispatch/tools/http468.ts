@@ -550,13 +550,19 @@ async function replaceSystemPluginResponse({
           filename,
           metadata: {}
         });
-        response[key] = `${ReadFileBaseUrl}/${filename}?token=${await createFileToken({
+
+        const token = await createFileToken({
           bucketName: 'chat',
           teamId,
           uid: tmbId,
           fileId
-        })}`;
-      } catch (error) {}
+        });
+
+        // 使用新的API路由，将token放在路径中
+        response[key] = `${ReadFileBaseUrl}/${encodeURIComponent(token)}/${filename}`;
+      } catch (error) {
+        addLog.error('Failed to process system plugin base64 file', error);
+      }
     }
   }
   return response;
