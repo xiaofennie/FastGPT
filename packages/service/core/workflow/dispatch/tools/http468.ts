@@ -558,10 +558,13 @@ async function replaceSystemPluginResponse({
           fileId
         });
 
-        console.log('token=====:', token);
+        // 使用fileId作为文件名，而不是tmbId-timestamp，确保与token中的fileId匹配
+        const fileExtension = fileObj.extension;
+        const fullURL = `${ReadFileBaseUrl}/${fileId}.${fileExtension}?token=${encodeURIComponent(token)}&t=${Date.now()}`;
 
-        // 使用新的API路由，将token放在路径中
-        response[key] = `${ReadFileBaseUrl}/${encodeURIComponent(token)}/${filename}`;
+        // 关键修复：直接设置为markdown格式，确保LLM不会重新处理URL
+        const markdownImage = `![${key}](${fullURL})`;
+        response[key] = markdownImage;
       } catch (error) {
         addLog.error('Failed to process system plugin base64 file', error);
       }

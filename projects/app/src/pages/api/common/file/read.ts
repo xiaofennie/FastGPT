@@ -12,6 +12,7 @@ const previewableExtensions = [
   'gif',
   'bmp',
   'webp',
+  'svg',
   'txt',
   'log',
   'csv',
