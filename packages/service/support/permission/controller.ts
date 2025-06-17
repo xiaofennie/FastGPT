@@ -412,13 +412,17 @@ export const createFileToken = (data: FileTokenQuery) => {
   const expiredTime = Math.floor(addMinutes(new Date(), expireMinutes).getTime() / 1000);
 
   const key = (process.env.FILE_TOKEN_KEY as string) ?? 'filetoken';
-  const token = jwt.sign(
-    {
-      ...data,
-      exp: expiredTime
-    },
-    key
-  );
+
+  // 确保所有ID都是字符串类型，避免ObjectId导致的JWT签名问题
+  const tokenData = {
+    bucketName: data.bucketName,
+    teamId: String(data.teamId),
+    uid: String(data.uid),
+    fileId: String(data.fileId),
+    exp: expiredTime
+  };
+
+  const token = jwt.sign(tokenData, key);
   return Promise.resolve(token);
 };
 
@@ -434,6 +438,7 @@ export const authFileToken = (token?: string) =>
         reject(ERROR_ENUM.unAuthFile);
         return;
       }
+
       resolve({
         bucketName: decoded.bucketName,
         teamId: decoded.teamId,

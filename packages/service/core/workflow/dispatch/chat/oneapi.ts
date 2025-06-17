@@ -199,7 +199,7 @@ export const dispatchChatCompletion = async (props: ChatProps): Promise<ChatResp
     },
     modelConstantsData
   );
-  // console.log(JSON.stringify(requestBody, null, 2), '===');
+  console.log('AI对话请求参数:', JSON.stringify(requestBody, null, 2));
   const { response, isStreamResponse, getEmptyResponseTip } = await createChatCompletion({
     body: requestBody,
     userKey: externalProvider.openaiAccount,

@@ -19,10 +19,32 @@ type Response = Promise<{
 const parseChartData = (xAxis: string | string[], yAxis: string | string[]) => {
   try {
     // 处理xAxis - 如果是数组直接使用，如果是字符串则分割
-    const parsedXAxis = Array.isArray(xAxis) ? xAxis : JSON.parse(xAxis);
+    let parsedXAxis;
+    if (Array.isArray(xAxis)) {
+      parsedXAxis = xAxis;
+    } else {
+      try {
+        parsedXAxis = JSON.parse(xAxis);
+      } catch {
+        parsedXAxis = xAxis;
+      }
+    }
+    if (typeof parsedXAxis === 'string') parsedXAxis = parsedXAxis.split(',');
 
     // 处理yAxis - 如果是数组直接使用，如果是字符串则分割
-    const parsedYAxis = Array.isArray(yAxis) ? yAxis : JSON.parse(yAxis);
+    let parsedYAxis;
+    if (Array.isArray(yAxis)) {
+      parsedYAxis = yAxis;
+    } else {
+      try {
+        parsedYAxis = JSON.parse(yAxis);
+      } catch {
+        parsedYAxis = yAxis;
+      }
+    }
+    if (typeof parsedYAxis === 'string') parsedYAxis = parsedYAxis.split(',');
+
+    console.log('charts', parsedXAxis, parsedYAxis);
 
     return {
       xAxis: parsedXAxis,

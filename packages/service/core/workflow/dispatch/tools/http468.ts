@@ -558,9 +558,8 @@ async function replaceSystemPluginResponse({
           fileId
         });
 
-        // 使用fileId作为文件名，而不是tmbId-timestamp，确保与token中的fileId匹配
-        const fileExtension = fileObj.extension;
-        const fullURL = `${ReadFileBaseUrl}/${fileId}.${fileExtension}?token=${encodeURIComponent(token)}&t=${Date.now()}`;
+        // 使用实际存储的文件名，确保与文件系统中的文件名匹配
+        const fullURL = `${ReadFileBaseUrl}/${filename}?token=${encodeURIComponent(token)}&t=${Date.now()}`;
 
         // 关键修复：直接设置为markdown格式，确保LLM不会重新处理URL
         const markdownImage = `![${key}](${fullURL})`;

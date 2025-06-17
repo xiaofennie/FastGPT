@@ -68,7 +68,7 @@
             "canEdit": true,
             "key": "yAxis",
             "label": "yAxis",
-            "description": "y轴数据，例如：['1', '2', '3']",
+            "description": "y轴数据，例如：[1,2,3]",
             "defaultValue": "",
             "list": [
               {
@@ -77,7 +77,7 @@
               }
             ],
             "required": true,
-            "toolDescription": "y轴数据，例如：['1', '2', '3']"
+            "toolDescription": "y轴数据，例如：[1,2,3]"
           },
           {
             "renderTypeList": ["select", "reference"],

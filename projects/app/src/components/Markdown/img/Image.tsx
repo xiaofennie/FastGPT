@@ -31,6 +31,7 @@ const MdImage = ({ src, ...props }: { src?: string } & ImageProps) => {
           setTrue();
         }}
         onError={() => {
+          console.log('onImgError', src);
           setRenderSrc('/imgs/errImg.png');
           setTrue();
         }}

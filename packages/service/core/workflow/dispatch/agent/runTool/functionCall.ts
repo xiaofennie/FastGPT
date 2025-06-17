@@ -243,7 +243,7 @@ export const runToolWithFunctionCall = async (
     toolModel
   );
 
-  // console.log(JSON.stringify(requestMessages, null, 2));
+  console.log('工具调用请求参数function_call:', JSON.stringify(requestBody, null, 2));
   /* Run llm */
   const {
     response: aiResponse,

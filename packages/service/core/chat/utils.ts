@@ -376,23 +376,28 @@ export const loadRequestMessages = async ({
           const parseContent = parseAssistantContent(item.content);
 
           // 如果内容为空，且前后不再是 assistant，需要补充成 null，避免丢失 user-assistant 的交互
-          const formatContent = (() => {
-            const lastItem = mergeMessages[i - 1];
-            const nextItem = mergeMessages[i + 1];
-            if (
-              parseContent === '' &&
-              (lastItem?.role === ChatCompletionRequestMessageRoleEnum.Assistant ||
-                nextItem?.role === ChatCompletionRequestMessageRoleEnum.Assistant)
-            ) {
-              return;
-            }
-            return parseContent || 'null';
-          })();
-          if (!formatContent) return;
+          // const formatContent = (() => {
+          //   const lastItem = mergeMessages[i - 1];
+          //   const nextItem = mergeMessages[i + 1];
+          //   if (
+          //     parseContent === '' &&
+          //     (lastItem?.role === ChatCompletionRequestMessageRoleEnum.Assistant ||
+          //       nextItem?.role === ChatCompletionRequestMessageRoleEnum.Assistant)
+          //   ) {
+          //     return;
+          //   }
+          //   return parseContent || 'null';
+          // })();
+          // if (!formatContent) return;
+
+          // 简化的逻辑：直接过滤空字符串
+          if (parseContent === '') {
+            return; // 内容为空字符串时直接过滤
+          }
 
           return {
             ...formatAssistantItem(item),
-            content: formatContent
+            content: parseContent
           };
         } else {
           return item;
