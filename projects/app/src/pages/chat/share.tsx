@@ -46,6 +46,10 @@ import { jwtCassWechat } from '@/service/common/system/index';
 
 // 添加企业微信 token 缓存
 const wechatTokenCache = new Map<string, { token: string; timestamp: number }>();
+// 添加 app user token 缓存
+const appUserCache = new Map<string, { user: any; timestamp: number }>();
+// 添加基于 appId 的最近用户缓存
+const recentUserCache = new Map<string, { user: any; timestamp: number }>();
 const CACHE_DURATION = 2 * 60 * 1000; // 5分钟缓存时间
 
 // 清理过期缓存的函数
@@ -54,6 +58,16 @@ const cleanExpiredCache = () => {
   for (const [key, value] of wechatTokenCache.entries()) {
     if (now - value.timestamp > CACHE_DURATION) {
       wechatTokenCache.delete(key);
+    }
+  }
+  for (const [key, value] of appUserCache.entries()) {
+    if (now - value.timestamp > CACHE_DURATION) {
+      appUserCache.delete(key);
+    }
+  }
+  for (const [key, value] of recentUserCache.entries()) {
+    if (now - value.timestamp > CACHE_DURATION) {
+      recentUserCache.delete(key);
     }
   }
 };
@@ -456,7 +470,7 @@ export async function getServerSideProps(context: any) {
   const cassWechatCode = context?.query?.code || '';
 
   const cookies = context.req.cookies;
-  const cassAppUser = cookies.jwt || '';
+  const jwt = cookies.jwt || '';
 
   const app = await (async () => {
     try {
@@ -475,24 +489,54 @@ export async function getServerSideProps(context: any) {
   })();
 
   let cassWechatToken = '';
+  let cassAppUser = '';
+
+  cleanExpiredCache();
+
+  if (jwt) {
+    const cacheKey = `${app?.appId}-${jwt}`;
+    const cachedData = appUserCache.get(cacheKey);
+    const now = Date.now();
+
+    if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
+      cassAppUser = cachedData.user;
+    } else {
+      cassAppUser = jwt;
+      if (cassAppUser) {
+        appUserCache.set(cacheKey, {
+          user: cassAppUser,
+          timestamp: now
+        });
+        // 同时更新最近用户缓存
+        if (app?.appId) {
+          recentUserCache.set(String(app.appId), {
+            user: cassAppUser,
+            timestamp: now
+          });
+        }
+      }
+    }
+  } else {
+    // 当没有 jwt cookie 时，尝试从最近用户缓存中获取
+    if (app?.appId && context.req.url?.includes('/_next/data/')) {
+      const recentUser = recentUserCache.get(String(app.appId));
+      if (recentUser && Date.now() - recentUser.timestamp < CACHE_DURATION) {
+        cassAppUser = recentUser.user;
+      }
+    }
+  }
 
   if (cassWechatCode) {
-    // 清理过期缓存
-    cleanExpiredCache();
-
     // 创建缓存键
     const cacheKey = `${app?.appId}-${cassWechatCode}`;
     const cachedData = wechatTokenCache.get(cacheKey);
     const now = Date.now();
 
-    // 检查缓存是否存在且未过期
     if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
       cassWechatToken = cachedData.token;
-      console.log('从缓存获取企微 token:', cassWechatToken);
     } else if (!context.req.url?.includes('/_next/data/')) {
       // 只在第一次请求时调用 API
       cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
-      console.log('获得企微 token:', cassWechatToken);
 
       // 将结果存入缓存
       if (cassWechatToken) {
@@ -500,7 +544,6 @@ export async function getServerSideProps(context: any) {
           token: cassWechatToken,
           timestamp: now
         });
-        console.log('企微 token 已缓存');
       }
     }
   }

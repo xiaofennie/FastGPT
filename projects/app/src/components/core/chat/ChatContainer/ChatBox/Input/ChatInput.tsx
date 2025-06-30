@@ -213,7 +213,7 @@ const ChatInput = ({
           zIndex={3}
         >
           {/* Voice input icon */}
-          {whisperConfig?.open && !inputValue && (
+          {/* {whisperConfig?.open && !inputValue && (
             <MyTooltip label={t('common:core.chat.Record')}>
               <Flex
                 alignItems={'center'}
@@ -237,7 +237,7 @@ const ChatInput = ({
                 />
               </Flex>
             </MyTooltip>
-          )}
+          )} */}
 
           {/* send and stop icon */}
           <Flex
