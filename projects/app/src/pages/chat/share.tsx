@@ -44,34 +44,6 @@ const CustomPluginRunBox = dynamic(() => import('@/pageComponents/chat/CustomPlu
 
 import { jwtCassWechat } from '@/service/common/system/index';
 
-// 添加企业微信 token 缓存
-const wechatTokenCache = new Map<string, { token: string; timestamp: number }>();
-// 添加 app user token 缓存
-const appUserCache = new Map<string, { user: any; timestamp: number }>();
-// 添加基于 appId 的最近用户缓存
-const recentUserCache = new Map<string, { user: any; timestamp: number }>();
-const CACHE_DURATION = 2 * 60 * 1000; // 5分钟缓存时间
-
-// 清理过期缓存的函数
-const cleanExpiredCache = () => {
-  const now = Date.now();
-  for (const [key, value] of wechatTokenCache.entries()) {
-    if (now - value.timestamp > CACHE_DURATION) {
-      wechatTokenCache.delete(key);
-    }
-  }
-  for (const [key, value] of appUserCache.entries()) {
-    if (now - value.timestamp > CACHE_DURATION) {
-      appUserCache.delete(key);
-    }
-  }
-  for (const [key, value] of recentUserCache.entries()) {
-    if (now - value.timestamp > CACHE_DURATION) {
-      recentUserCache.delete(key);
-    }
-  }
-};
-
 type Props = {
   appId: string;
   appName: string;
@@ -85,8 +57,7 @@ type Props = {
   // showFullText: boolean;
   showNodeStatus: boolean;
   cassWebUserSub: string;
-  cassWechatUser: string;
-  cassAppUser: string;
+  cassWechatCode: string;
 };
 
 const OutLink = (props: Props) => {
@@ -125,6 +96,29 @@ const OutLink = (props: Props) => {
   const chatRecords = useContextSelector(ChatRecordContext, (v) => v.chatRecords);
   const totalRecordsCount = useContextSelector(ChatRecordContext, (v) => v.totalRecordsCount);
   const isChatRecordsLoaded = useContextSelector(ChatRecordContext, (v) => v.isChatRecordsLoaded);
+
+  // 获取 cookie 中的 jwt
+  const [cassAppUser, setCassAppUser] = useState('');
+  const [cassWechatUser, setCassWechatUser] = useState('');
+
+  useEffect(() => {
+    const cookieRes = document.cookie.split(';');
+    const jwt = cookieRes.find((row) => row.startsWith('jwt'));
+    if (jwt) {
+      setCassAppUser(jwt.split('=')[1]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (props.cassWechatCode && props.appId) {
+      getCassWechatUser(props.appId, props.cassWechatCode);
+    }
+  }, [props.cassWechatCode, props.appId]);
+
+  const getCassWechatUser = async (appId: string, cassWechatCode: string) => {
+    const res = (await jwtCassWechat(appId, cassWechatCode)) as string;
+    setCassWechatUser(res);
+  };
 
   const initSign = useRef(false);
   const { data, loading } = useRequest2(
@@ -191,24 +185,20 @@ const OutLink = (props: Props) => {
         cassUserOrigin,
         cassUserId = '';
 
-      console.log(
-        `WEB: ${props.cassWebUserSub}`,
-        `企微: ${props.cassWechatUser}`,
-        `APP: ${props.cassAppUser}`
-      );
+      console.log(`WEB: ${props.cassWebUserSub}`, `企微: ${cassWechatUser}`, `APP: ${cassAppUser}`);
 
       if (props.cassWebUserSub) {
         cassUserType = 'USER_LOGIN_ID';
         cassUserOrigin = 'WEB';
         cassUserId = props.cassWebUserSub;
-      } else if (props.cassWechatUser) {
+      } else if (cassWechatUser) {
         cassUserType = 'USER_NUMBER';
         cassUserOrigin = 'WECHAT';
-        cassUserId = props.cassWechatUser;
-      } else if (props.cassAppUser) {
+        cassUserId = cassWechatUser;
+      } else if (cassAppUser) {
         cassUserType = 'USER_LOGIN_ID';
         cassUserOrigin = 'APP';
-        cassUserId = props.cassAppUser;
+        cassUserId = cassAppUser;
       }
 
       const { responseText } = await streamFetch({
@@ -469,8 +459,7 @@ export async function getServerSideProps(context: any) {
   const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
   const cassWechatCode = context?.query?.code || '';
 
-  const cookies = context.req.cookies;
-  const jwt = cookies.jwt || '';
+  console.log('企微code', cassWechatCode);
 
   const app = await (async () => {
     try {
@@ -488,66 +477,6 @@ export async function getServerSideProps(context: any) {
     }
   })();
 
-  let cassWechatToken = '';
-  let cassAppUser = '';
-
-  cleanExpiredCache();
-
-  if (jwt) {
-    const cacheKey = `${app?.appId}-${jwt}`;
-    const cachedData = appUserCache.get(cacheKey);
-    const now = Date.now();
-
-    if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
-      cassAppUser = cachedData.user;
-    } else {
-      cassAppUser = jwt;
-      if (cassAppUser) {
-        appUserCache.set(cacheKey, {
-          user: cassAppUser,
-          timestamp: now
-        });
-        // 同时更新最近用户缓存
-        if (app?.appId) {
-          recentUserCache.set(String(app.appId), {
-            user: cassAppUser,
-            timestamp: now
-          });
-        }
-      }
-    }
-  } else {
-    // 当没有 jwt cookie 时，尝试从最近用户缓存中获取
-    if (app?.appId && context.req.url?.includes('/_next/data/')) {
-      const recentUser = recentUserCache.get(String(app.appId));
-      if (recentUser && Date.now() - recentUser.timestamp < CACHE_DURATION) {
-        cassAppUser = recentUser.user;
-      }
-    }
-  }
-
-  if (cassWechatCode) {
-    // 创建缓存键
-    const cacheKey = `${app?.appId}-${cassWechatCode}`;
-    const cachedData = wechatTokenCache.get(cacheKey);
-    const now = Date.now();
-
-    if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
-      cassWechatToken = cachedData.token;
-    } else if (!context.req.url?.includes('/_next/data/')) {
-      // 只在第一次请求时调用 API
-      cassWechatToken = (await jwtCassWechat(app?.appId, cassWechatCode)) as string;
-
-      // 将结果存入缓存
-      if (cassWechatToken) {
-        wechatTokenCache.set(cacheKey, {
-          token: cassWechatToken,
-          timestamp: now
-        });
-      }
-    }
-  }
-
   return {
     props: {
       appId: app?.appId ? String(app?.appId) : '',
@@ -561,8 +490,7 @@ export async function getServerSideProps(context: any) {
       shareId: shareId ?? '',
       authToken: authToken ?? '',
       cassWebUserSub: cassWebAuthToken ?? '',
-      cassWechatUser: cassWechatToken ?? '',
-      cassAppUser: cassAppUser ?? '',
+      cassWechatCode: cassWechatCode ?? '',
       customUid,
       ...(await serviceSideProps(context, ['file', 'app', 'chat', 'workflow']))
     }
