@@ -42,7 +42,7 @@ import { useToast } from '@fastgpt/web/hooks/useToast';
 
 const CustomPluginRunBox = dynamic(() => import('@/pageComponents/chat/CustomPluginRunBox'));
 
-import { jwtCassWechat } from '@/service/common/system/index';
+import { getCassWechatUserApi } from '@/web/common/cass/api';
 
 type Props = {
   appId: string;
@@ -103,7 +103,7 @@ const OutLink = (props: Props) => {
 
   useEffect(() => {
     const cookieRes = document.cookie.split(';');
-    const jwt = cookieRes.find((row) => row.startsWith('jwt'));
+    const jwt = cookieRes.find((row) => row.trim().startsWith('jwt'));
     if (jwt) {
       setCassAppUser(jwt.split('=')[1]);
     }
@@ -116,8 +116,12 @@ const OutLink = (props: Props) => {
   }, [props.cassWechatCode, props.appId]);
 
   const getCassWechatUser = async (appId: string, cassWechatCode: string) => {
-    const res = (await jwtCassWechat(appId, cassWechatCode)) as string;
-    setCassWechatUser(res);
+    try {
+      const res = await getCassWechatUserApi({ appId, cassWechatCode });
+      setCassWechatUser(res.result);
+    } catch (error) {
+      console.error('获取企微用户信息失败:', error);
+    }
   };
 
   const initSign = useRef(false);
@@ -458,8 +462,6 @@ export async function getServerSideProps(context: any) {
 
   const cassWebAuthToken = context?.query?.cassWebAuthToken || '';
   const cassWechatCode = context?.query?.code || '';
-
-  console.log('企微code', cassWechatCode);
 
   const app = await (async () => {
     try {

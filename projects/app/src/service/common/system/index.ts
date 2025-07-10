@@ -36,6 +36,8 @@ import { addLog } from '@fastgpt/service/common/system/log';
 import { connectionMongo } from '@fastgpt/service/common/mongo';
 import axios from 'axios';
 
+import { Types } from '@fastgpt/service/common/mongo';
+
 export const readConfigData = async (name: string) => {
   const splitName = name.split('.');
   const devName = `${splitName[0]}.local.${splitName[1]}`;
@@ -277,10 +279,10 @@ export function jwtCassWechat(appId: string | undefined, code: String) {
     // 获取集合
     const collection = db?.collection('casscorpsecret');
 
-    const result = await collection?.findOne({ appId });
+    const result = await collection?.findOne({ appId: new Types.ObjectId(appId) });
 
     if (!result) {
-      addLog.error('jwtCassWechat error: casscorpsecret找不到appId', appId);
+      addLog.error(`jwtCassWechat error: casscorpsecret找不到appId,${appId}`);
       resolve(null);
     }
 
