@@ -14,6 +14,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
+    console.log('查询企微用户信息', appId, cassWechatCode);
+
     const result = await jwtCassWechat(appId, cassWechatCode);
 
     console.log('jwtCassWechat3', result);

@@ -303,7 +303,7 @@ export const runToolWithToolChoice = async (
     },
     toolModel
   );
-  console.log('工具调用请求参数tool_choice:', JSON.stringify(requestBody, null, 2));
+  // console.log('工具调用请求参数tool_choice:', JSON.stringify(requestBody, null, 2));
   /* Run llm */
   const {
     response: aiResponse,

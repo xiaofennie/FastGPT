@@ -251,7 +251,7 @@ export const runToolWithPromptCall = async (
     toolModel
   );
 
-  console.log('工具调用请求参数prompt_call:', JSON.stringify(requestBody, null, 2));
+  // console.log('工具调用请求参数prompt_call:', JSON.stringify(requestBody, null, 2));
   /* Run llm */
   const {
     response: aiResponse,
