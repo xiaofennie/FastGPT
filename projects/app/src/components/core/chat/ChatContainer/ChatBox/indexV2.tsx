@@ -51,7 +51,7 @@ import { textareaMinH } from './constants';
 import { SseResponseEventEnum } from '@fastgpt/global/core/workflow/runtime/constants';
 import ChatProvider, { ChatBoxContext, type ChatProviderProps } from './ProviderV2';
 
-import ChatItem from './components/ChatItem';
+import ChatItem from './components/ChatItemV2';
 
 import dynamic from 'next/dynamic';
 import type { StreamResponseType } from '@/web/common/api/fetch';
@@ -977,11 +977,11 @@ const ChatBox = ({
             {chatRecords.map((item, index) => (
               <Box key={item.dataId}>
                 {/* 并且时间和上一条的time相差超过十分钟 */}
-                {index !== 0 &&
+                {/* {index !== 0 &&
                   item.time &&
                   chatRecords[index - 1].time !== undefined &&
                   new Date(item.time).getTime() - new Date(chatRecords[index - 1].time!).getTime() >
-                    10 * 60 * 1000 && <TimeBox time={item.time} />}
+                    10 * 60 * 1000 && <TimeBox time={item.time} />} */}
 
                 <Box py={item.hideInUI ? 0 : 6}>
                   {item.obj === ChatRoleEnum.Human && !item.hideInUI && (

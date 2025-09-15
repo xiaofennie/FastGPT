@@ -32,11 +32,13 @@ async function handler(
 
   const [data, total] = await Promise.all([
     await MongoChat.find(queryCondition, 'chatId title top customTitle appId updateTime')
-      .sort({ top: -1, updateTime: -1 })
+      .sort({ updateTime: -1 })
       .skip(Number(offset))
       .limit(Number(pageSize)),
     MongoChat.countDocuments(queryCondition)
   ]);
+
+  console.log('data', data);
 
   return {
     list: data.map((item) => ({
