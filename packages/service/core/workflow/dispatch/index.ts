@@ -423,7 +423,8 @@ export async function dispatchWorkFlow(data: Props): Promise<DispatchFlowRespons
     node: RuntimeNodeItemType,
     skippedNodeIdList = new Set<string>()
   ): Promise<RuntimeNodeItemType[]> {
-    if (res?.closed || props.maxRunTimes <= 0) return [];
+    // if (res?.closed || props.maxRunTimes <= 0) return [];
+    if (props.maxRunTimes <= 0) return [];
     // Thread avoidance
     await surrenderProcess();
 
@@ -507,14 +508,14 @@ export async function dispatchWorkFlow(data: Props): Promise<DispatchFlowRespons
       await Promise.all(nextStepSkipNodes.map((node) => checkNodeCanRun(node, skippedNodeIdList)))
     ).flat();
 
-    if (res?.closed) {
-      addLog.warn('Request is closed', {
-        appId: props.runningAppInfo.id,
-        nodeId: node.nodeId,
-        nodeName: node.name
-      });
-      return [];
-    }
+    // if (res?.closed) {
+    //   addLog.warn('Request is closed', {
+    //     appId: props.runningAppInfo.id,
+    //     nodeId: node.nodeId,
+    //     nodeName: node.name
+    //   });
+    //   return [];
+    // }
 
     return [
       ...nextStepActiveNodes,

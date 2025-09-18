@@ -99,13 +99,18 @@ const OutLink = (props: Props) => {
 
   // 获取 cookie 中的 jwt
   const [cassAppUser, setCassAppUser] = useState('');
+  const [cassShareUser, setCassShareUser] = useState('');
   const [cassWechatUser, setCassWechatUser] = useState('');
 
   useEffect(() => {
     const cookieRes = document.cookie.split(';');
     const jwt = cookieRes.find((row) => row.trim().startsWith('jwt'));
+    const jwtShare = cookieRes.find((row) => row.trim().startsWith('username'));
     if (jwt) {
       setCassAppUser(jwt.split('=')[1]);
+    }
+    if (jwtShare) {
+      setCassShareUser(jwtShare.split('=')[1]);
     }
   }, []);
 
@@ -189,7 +194,12 @@ const OutLink = (props: Props) => {
         cassUserOrigin,
         cassUserId = '';
 
-      console.log(`WEB: ${props.cassWebUserSub}`, `企微: ${cassWechatUser}`, `APP: ${cassAppUser}`);
+      console.log(
+        `WEB: ${props.cassWebUserSub}`,
+        `企微: ${cassWechatUser}`,
+        `APP: ${cassAppUser}`,
+        `SHARE: ${cassShareUser}`
+      );
 
       if (props.cassWebUserSub) {
         cassUserType = 'USER_LOGIN_ID';
@@ -203,6 +213,10 @@ const OutLink = (props: Props) => {
         cassUserType = 'USER_LOGIN_ID';
         cassUserOrigin = 'APP';
         cassUserId = cassAppUser;
+      } else if (cassShareUser) {
+        cassUserType = 'USER_NUMBER';
+        cassUserOrigin = 'SHARE';
+        cassUserId = cassShareUser;
       }
 
       const { responseText } = await streamFetch({

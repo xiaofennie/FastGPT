@@ -132,6 +132,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         variables.cassUserId = await parseCassAppJwt(variables.cassUserId);
         console.info('cass的APP用户', variables.cassUserId);
         break;
+      case 'SHARE':
+        variables.cassUserId = variables.cassUserId;
+        console.info('cass的SHARE用户', variables.cassUserId);
+        break;
     }
   }
 
@@ -364,6 +368,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         return Promise.reject('您的工作流版本过低，请重新发布一次');
       })();
+
+    addLog.info('flowResponses' + chatId, {
+      flowResponses,
+      flowUsages,
+      assistantResponses,
+      newVariables,
+      durationSeconds
+    });
 
     // save chat
     const isOwnerUse = !shareId && !spaceTeamId && String(tmbId) === String(app.tmbId);
